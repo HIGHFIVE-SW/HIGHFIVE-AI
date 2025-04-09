@@ -2,3 +2,10 @@ flask
 flask-cors
 requests
 python-dotenv
+pydantic
+langchain
+langchain-openai
+langgraph
+langchain-teddynote
+langgraph-checkpoint-sqlite
+nest_asyncio
