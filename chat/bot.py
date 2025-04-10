@@ -17,6 +17,3 @@ class Bot(BaseBot, LangGraphMethods):
         self.graph: CompiledStateGraph = self.build_graph()
         self.id = user_id # TODO: 사용자별로 고유한 bot_id 필요
 
-    def ask(self, question:str) -> str:
-        return "챗봇의 응답입니다."
-

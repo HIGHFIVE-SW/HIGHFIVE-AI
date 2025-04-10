@@ -9,3 +9,8 @@ langgraph
 langchain-teddynote
 langgraph-checkpoint-sqlite
 nest_asyncio
+langchain-community
+mysql-connector-python
+pymysql
+sqlalchemy
+faiss-cpu
