@@ -1,3 +1,10 @@
+from os.path import dirname
+from .local_vectorstore import __file__ as f
+vectorstore_dir = dirname(f)
+vectorstore_index_name:str = "activity"
+
+openai_dimension_size:int = 1536
+
 indication_for_information_request = """
 You are an intelligent assistant designed to answer user questions based on the provided context retrieved from the web.
 The user will likely ask about recent global issues or topics related to current worldwide events. 
@@ -79,3 +86,5 @@ Remember:
 # Here is the CONTEXT that you should use to answer the question:
 {context}
 """
+
+

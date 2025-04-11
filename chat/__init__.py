@@ -23,6 +23,6 @@ def chat_with_watson(user_id):
             return jsonify({"answer": f"죄송합니다. 에러가 발생했습니다. 시스템, 또는 AI를 제공하는 외부 API의 문제일 수 있습니다."}), 500
     else:
         Bot(user_id).clear_message_history() # TODO: 버그 발생중. 확인 필요
-        jsonify({"message": "success"}), 200
+        return jsonify({"message": "success"}), 200
 
 

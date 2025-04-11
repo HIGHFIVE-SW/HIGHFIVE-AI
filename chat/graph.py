@@ -1,30 +1,23 @@
-import os
 import sqlite3
 import typing
-from typing import Any, Literal, Annotated, Sequence, TypedDict, Union, Optional
+from typing import Literal, Annotated, Sequence, TypedDict, Union
 
 from dotenv import load_dotenv
-from langchain_community.document_loaders import SQLDatabaseLoader
 from langchain_core.documents import Document
-from langchain_core.messages import HumanMessage, BaseMessage, SystemMessage, AIMessage
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.messages import BaseMessage
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import create_retriever_tool, Tool
-from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI
 from langchain_teddynote.graphs import visualize_graph
 from langchain_teddynote.models import get_model_name, LLMs
-from langgraph.checkpoint.sqlite import SqliteSaver
-from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
-from langgraph.prebuilt import ToolNode
-from pydantic import BaseModel, Field, Json
+from pydantic import BaseModel, Field
 
 from server.logger import logger
 from .constants import indication_for_information_request, indication_for_recommendation_request
-from .tools import tavily_search_tool, retriever_tool, tavily_search_tool_node, retriever_tool_node
+from .tools import tavily_search_tool, tavily_search_tool_node
 
 load_dotenv()
 
@@ -137,7 +130,7 @@ class LangGraphMethods:
                              type="information")
 
     @staticmethod
-    def recommend(state: GraphState) -> GraphState:
+    def recommend(state: GraphState, retriever_tool) -> GraphState:
         question = state["messages"][-1].content
 
         # LLM 모델 초기화
@@ -195,8 +188,8 @@ class LangGraphMethods:
         workflow.add_node("ask_question", self.ask_question)
         workflow.add_node("search_web", self.search_web)
         workflow.add_node("tavily_search", tavily_search_tool_node)
-        workflow.add_node("recommend", self.recommend)
-        workflow.add_node("retrieve", retriever_tool_node)
+        workflow.add_node("recommend", lambda state: self.recommend(state, self.retriever_tool))
+        workflow.add_node("retrieve", self.retriever_tool_node)
         workflow.add_node("generate", self.generate)
 
         workflow.set_entry_point("ask_question")
@@ -223,6 +216,7 @@ class LangGraphMethods:
         return compiled_workflow
 
     def ask(self: 'Bot', question: str) -> str:
+        self.update_vectorstore()
         inputs = {
             "messages": [
                 ("user", question)
