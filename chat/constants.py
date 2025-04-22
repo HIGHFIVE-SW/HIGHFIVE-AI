@@ -60,7 +60,7 @@ Your final answer should be written concisely, followed by the source of the inf
 
 1. Carefully read and understand the context provided and the chat history.
 2. Identify the key information related to the question within the context.
-3. Summarize or highlight the most relevant aspects of each activity (e.g., purpose, eligibility, benefits).
+3. Summarize or highlight the most relevant aspects of each activity (e.g., purpose, eligibility, benefits, start and end date).
 4. Recommend these activities to the user.
 5. List the source of the answer in bullet points, which must be a url of the document, followed by brief part of the context. Omit if the source cannot be found.
 6. If the context is empty or does not contain any activity information, politely explain that no suitable recommendations are available at the moment.
@@ -70,7 +70,7 @@ Your final answer should be written concisely, followed by the source of the inf
 Your final answer here.
 
 **Source**(Optional)
-- (Source of the answer, must be a url of the source information, followed by brief part of the context. Omit if you can't find the source of the answer.)
+- (Source of the answer, must be a url of the source information, followed by brief part of the context and source site name. Omit if you can't find the source of the answer.)
 - (list more if there are multiple sources)
 - ...
 

@@ -33,7 +33,7 @@ class Tools:
     @classmethod
     def create_retriever_tool(cls: 'Bot') -> Tool:
         return create_retriever_tool(
-            retriever=cls.vectorstore.as_retriever(search_kwargs={"k": 2}),  # 2개의 문서 검색,
+            retriever=cls.vectorstore.as_retriever(search_kwargs={"k": 5}),  # 5개의 문서 검색,
             name="retrieve_global_activities",
             description="Searches and returns information of some activities that are most relevant to the question or keywords.",
             document_prompt=PromptTemplate.from_template(
@@ -42,10 +42,10 @@ class Tools:
                     <context>{page_content}</context>
                     <metadata>
                         <name>{name}</name>
-                        <type>{type}</type>
-                        <keyword>{keyword}</keyword>
+                        <site_url>{url}</site_url>
                         <start_date>{start_date}</start_date>
                         <end_date>{end_date}</end_date>
+                        <source_site>{source_site}</source_site>
                     </metadata>
                 </document>
                 """
