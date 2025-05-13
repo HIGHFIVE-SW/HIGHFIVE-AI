@@ -15,6 +15,7 @@ scikit-learn
 openai
 
 # OCR
+paddlepaddle
 paddleocr
 
 # MySQL

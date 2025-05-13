@@ -16,6 +16,8 @@ anyio==4.9.0
     # via
     #   httpx
     #   openai
+astor==0.8.1
+    # via paddlepaddle
 beautifulsoup4==4.13.4
     # via paddleocr
 blinker==1.9.0
@@ -35,6 +37,8 @@ colorama==0.4.6
     #   tqdm
 cython==3.1.0
     # via paddleocr
+decorator==5.2.1
+    # via paddlepaddle
 distro==1.9.0
     # via openai
 filelock==3.18.0
@@ -61,7 +65,9 @@ h11==0.16.0
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via openai
+    # via
+    #   openai
+    #   paddlepaddle
 huggingface-hub==0.31.1
     # via
     #   tokenizers
@@ -99,6 +105,7 @@ mysql-connector-python==9.3.0
     # via -r requirements.in
 networkx==3.4.2
     # via
+    #   paddlepaddle
     #   scikit-image
     #   torch
 numpy==2.2.5
@@ -109,7 +116,9 @@ numpy==2.2.5
     #   opencv-contrib-python
     #   opencv-python
     #   opencv-python-headless
+    #   opt-einsum
     #   paddleocr
+    #   paddlepaddle
     #   scikit-image
     #   scikit-learn
     #   scipy
@@ -126,6 +135,8 @@ opencv-python-headless==4.11.0.86
     # via
     #   albucore
     #   albumentations
+opt-einsum==3.3.0
+    # via paddlepaddle
 packaging==25.0
     # via
     #   huggingface-hub
@@ -134,11 +145,16 @@ packaging==25.0
     #   transformers
 paddleocr==2.10.0
     # via -r requirements.in
+paddlepaddle==3.0.0
+    # via -r requirements.in
 pillow==11.2.1
     # via
     #   imageio
     #   paddleocr
+    #   paddlepaddle
     #   scikit-image
+protobuf==6.30.2
+    # via paddlepaddle
 pyclipper==1.3.0.post6
     # via paddleocr
 pydantic==2.11.4
@@ -216,6 +232,7 @@ typing-extensions==4.13.2
     #   beautifulsoup4
     #   huggingface-hub
     #   openai
+    #   paddlepaddle
     #   pydantic
     #   pydantic-core
     #   python-docx
