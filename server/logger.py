@@ -152,7 +152,7 @@ class ModuleFilter(logging.Filter):
         if any(record_path.startswith(path) for path in self.allowed_paths):
             return True
 
-        # 3. site-packages 내부이고 로그 레벨이 경고 미만(INFO 혹은 DEBUG)이라면 필터링 (출력하지 않음)
+        # 3. site-packages 내부이고 로그 레벨이 WARNING 미만(INFO or DEBUG)이라면 필터링 (출력하지 않음)
         if record_path.lower().startswith(self.site_packages_path.lower()) and record.levelno < logging.WARNING:
             return False
 

@@ -1,7 +1,29 @@
+# coding: utf-8
+
+# flask 서버
 flask
 flask-cors
 requests
 python-dotenv
+
+# Bert 임베딩 기반 유사도 추정
+torch
+transformers
+scikit-learn
+
+# Generative AI
+openai
+
+# OCR
+paddlepaddle
+paddleocr
+
+# MySQL
+mysql-connector-python
+
+# 새로운 패키지
+# package-name
+
 pydantic
 langchain
 langchain-openai
@@ -10,7 +32,6 @@ langchain-teddynote
 langgraph-checkpoint-sqlite
 nest_asyncio
 langchain-community
-mysql-connector-python
 pymysql
 sqlalchemy
 faiss-cpu
