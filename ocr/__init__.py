@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify
-from utils import confirm_no_data
+from flask import Blueprint, jsonify
 from server.logger import logger
-from .o import O
+from .o import extract_text, compare_texts
 
 ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 
@@ -13,10 +12,10 @@ def evaluate_image(review_id):
     compare_text = ""
 
     # OCR 실행
-    extracted_text = O.extract_text(img_path)
+    extracted_text = extract_text(img_path)
     
     # 비교 실행
-    result = O.compare_texts(extracted_text, compare_text)
+    result = compare_texts(extracted_text, compare_text)
 
     try:
         return jsonify({"llm_validation": result,
