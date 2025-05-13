@@ -27,6 +27,9 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 from chat import chat_bp
 app.register_blueprint(chat_bp)
 
+from ocr import ocr_bp
+app.register_blueprint(ocr_bp)
+
 if __name__ == "__main__":
     logger.info("Flask server has started!")
     app.run(host="0.0.0.0", port=5000)
