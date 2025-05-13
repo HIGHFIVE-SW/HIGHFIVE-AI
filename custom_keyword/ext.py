@@ -16,10 +16,18 @@ def calculate_cosine_similarity(vec1, vec2):
     return cosine_similarity(vec1, vec2)
 
 def extract_keywords(question: str):
+    """
+    텍스트로부터 키워드를 추출하는 함수
+
+    Args:
+        question (str): 키워드를 추출하고자 하는 문자열
+    Returns:
+        str: 가장 유사도가 높은 키워드
+    """
     sentence_embedding = get_embeddings(question)
     domain_embeddings = [get_embeddings(keyword) for keyword in domain_keywords]
     similarities = [
         (keyword, calculate_cosine_similarity(sentence_embedding, embedding)[0][0])
         for keyword, embedding in zip(domain_keywords, domain_embeddings)
     ]
-    return sorted(similarities, key=lambda x: x[1], reverse=True)
+    return max(similarities, key=lambda x: x[1])[0]

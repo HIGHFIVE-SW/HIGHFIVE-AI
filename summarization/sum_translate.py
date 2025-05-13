@@ -5,8 +5,11 @@ model = "gpt-4"
 def summarize_translate_en_to_ko(text: str) -> str:
     """
     영어 텍스트를 한국어로 번역하고 요약.
-    :param text: 번역 및 요약할 영어 문장
-    :return: 요약된 한국어 번역 결과
+
+    Args:
+        text (str): 번역하고자 하는 원문(영어) 텍스트
+    Returns: 
+        str: 요약된 한국어 번역 결과
     """
     prompt = f"""
     Translate and summarize the following English text **into Korean** in **one or two sentences only**.
