@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from server.db import run_query
 from server.logger import logger
 from .o import extract_text, compare_texts
 
@@ -7,9 +8,13 @@ ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 @ocr_bp.route('/<review_id>', methods=['GET'])
 def evaluate_image(review_id):
     
-    # 데이터베이스에서 review_id를를 토대로 데이터를 가져옴(미구현)
-    img_path=""
-    compare_text = ""
+    img_query="""SELECT ri.image_urls
+    FROM reviews r
+    JOIN review_image_urls ri ON r.review_id = ri.review_id
+    WHERE r.review_id = '%s';"""
+    img_path = run_query(img_query, (review_id,))
+    compare_query="SELECT activity_name FROM reviews WHERE review_id='%s';"
+    compare_text = run_query(compare_query, (review_id,))
 
     # OCR 실행
     extracted_text = extract_text(img_path)

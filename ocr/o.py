@@ -1,9 +1,14 @@
 import torch
+import os
+from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from openai import OpenAI
 
+# .env파일 로드
+load_dotenv()
 
-client = OpenAI(api_key="") # 나중에 api키 교체
+# 환경 변수에서 API 키 가져오기
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4"
 ocr = PaddleOCR(lang="korean")
 
