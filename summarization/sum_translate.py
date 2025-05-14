@@ -1,5 +1,12 @@
 from openai import OpenAI
-client = OpenAI(api_key="") # 나중에 api_key 교체
+import os
+from dotenv import load_dotenv
+
+# .env파일 로드
+load_dotenv()
+
+# 환경 변수에서 API 키 가져오기
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4"
 
 def summarize_translate_en_to_ko(text: str) -> str:
