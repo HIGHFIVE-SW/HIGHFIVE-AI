@@ -3,6 +3,7 @@ import sys
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+from flasgger import Swagger
 
 from server.logger import logger
 
@@ -22,6 +23,8 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+swagger=Swagger(app)
 
 # 모든 Blueprint 등록
 from chat import chat_bp

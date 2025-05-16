@@ -17,6 +17,7 @@ openai
 
 # OCR
 paddleocr
+paddlepaddle
 
 # MySQL
 mysql-connector-python

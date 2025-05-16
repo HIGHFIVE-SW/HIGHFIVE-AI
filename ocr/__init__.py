@@ -13,7 +13,7 @@ def evaluate_image(review_id):
     parameters:
       - name: review_id
         in: path
-        type: string
+        type: "string"
         required: true
         description: 리뷰 ID
     responses:
@@ -25,7 +25,7 @@ def evaluate_image(review_id):
             llm_validation:
               type: boolean
             review_id:
-              type: string
+              type: "string"
       500:
         description: 서버 오류 발생
 
