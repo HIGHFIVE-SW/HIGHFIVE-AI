@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from server.db import run_query
 from server.logger import logger
-from .o import extract_text, compare_texts
+from .o import download_image, extract_text, compare_texts
 
 ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 
@@ -22,38 +22,53 @@ def evaluate_image(review_id):
         schema:
           type: object
           properties:
-            llm_validation:
-              type: boolean
+            ocr_result:
+              type: "string"
+              enum: ["True", "False"]
+            award_ocr_result:
+              type: "string"
+              enum: ["True", "False", "None"]
             review_id:
               type: "string"
       500:
         description: 서버 오류 발생
 
     """
-    img_query="""SELECT ri.image_urls
-    FROM reviews r
-    JOIN review_image_urls ri ON r.review_id = ri.review_id
-    WHERE r.review_id = '%s';"""
-    img_path = run_query(img_query, (review_id,))
-    compare_query="SELECT activity_name FROM reviews WHERE review_id='%s';"
+    # review_img_query="""SELECT ri.image_urls
+    # FROM reviews r
+    # JOIN review_image_urls ri ON r.review_id = ri.review_id
+    # WHERE r.review_id = %s;"""
+    review_img_query="""SELECT image_urls
+                    FROM review_image_urls
+                    WHERE HEX(review_id)=%s"""
+    review_img_path = run_query(review_img_query, (review_id,))
+
+    award_img_query = "SELECT award_image_url FROM reviews WHERE hex(review_id) = %s;"
+    award_img_path=run_query(award_img_query, (review_id, ))
+
+    compare_query="SELECT activity_name FROM reviews WHERE hex(review_id)=%s"
     compare_text = run_query(compare_query, (review_id,))
 
     # OCR 실행
-    extracted_text = extract_text(img_path)
-    
-    # 비교 실행
-    result = compare_texts(extracted_text, compare_text)
-
-   # 문자열 "True" 또는 "False"를 실제 Boolean 값으로 변환
-    if result == "True":
-        result = True
-    elif result == "False":
-        result = False
+    if review_img_path:
+      # ocr결과의 기본값은 False
+      ocr_result = "False"
+      for img_url in review_img_path:
+        image_stream = download_image(img_url)
+        extracted_text = extract_text(image_stream)
+        ocr_result = compare_texts(extracted_text, compare_text[0])
+        if ocr_result == "True":
+           break
+    if award_img_path[0][0]:
+      award_image_stream = download_image(award_img_path[0])
+      award_text = extract_text(award_image_stream)
+      award_ocr_result = compare_texts(award_text, compare_text[0])
     else:
-        result = False  # 예상치 못한 값이면 False로 처리
+       award_ocr_result = "None"
 
     try:
-        return jsonify({"llm_validation": result,
+        return jsonify({"ocr_result": ocr_result,
+                        "award_ocr_result": award_ocr_result,
                         "review_id": review_id}), 200
     except Exception as e:
         logger.error(e)
