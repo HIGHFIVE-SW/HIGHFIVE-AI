@@ -22,6 +22,8 @@ paddlepaddle
 # MySQL
 mysql-connector-python
 
+#boto3
+boto3
 # 새로운 패키지
 # package-name
 
