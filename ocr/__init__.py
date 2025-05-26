@@ -1,54 +1,75 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
+from flasgger import Swagger, swag_from
 from server.db import run_query
 from server.logger import logger
 from .o import download_image, extract_text, compare_texts
 
 ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 
-@ocr_bp.route('/<review_id>', methods=['GET'])
-def evaluate_image(review_id):
-    """
-    이미지 평가 API
-    ---
-    parameters:
-      - name: review_id
-        in: path
-        type: "string"
-        required: true
-        description: 리뷰 ID
-    responses:
-      200:
-        description: 성공적으로 평가됨
-        schema:
-          type: object
-          properties:
-            ocr_result:
-              type: "string"
-              enum: ["True", "False"]
-            award_ocr_result:
-              type: "string"
-              enum: ["True", "False", "None"]
-            review_id:
-              type: "string"
-      500:
-        description: 서버 오류 발생
+@ocr_bp.route('/', methods=['POST'])
+@swag_from({
+    'summary': 'OCR 이미지 비교 API',
+    'description': '이미지에서 텍스트를 추출하고 비교하는 API',
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'image_urls': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': '검토할 이미지 URL 리스트'
+                    },
+                    'award_img_urls': {
+                        'type': 'string',
+                        'description': '수상 이미지의 URL'
+                    },
+                    'title': {
+                        'type': 'string',
+                        'description': '비교할 기준 텍스트'
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'OCR 결과 반환',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'ocrResult': {'type': 'string', 'description': 'OCR 비교 결과'},
+                    'awardOcrResult': {'type': 'string', 'description': '수상 이미지 OCR 비교 결과'}
+                }
+            }
+        },
+        500: {
+            'description': '서버 에러 발생',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'answer': {'type': 'string', 'description': '에러 메시지'}
+                }
+            }
+        }
+    }
+})
 
-    """
-    # review_img_query="""SELECT ri.image_urls
-    # FROM reviews r
-    # JOIN review_image_urls ri ON r.review_id = ri.review_id
-    # WHERE r.review_id = %s;"""
-    review_img_query="""SELECT image_urls
-                    FROM review_image_urls
-                    WHERE HEX(review_id)=%s"""
-    review_img_path = run_query(review_img_query, (review_id,))
+def evaluate_image():
 
-    award_img_query = "SELECT award_image_url FROM reviews WHERE hex(review_id) = %s;"
-    award_img_path=run_query(award_img_query, (review_id, ))
 
-    compare_query="SELECT activity_name FROM reviews WHERE hex(review_id)=%s"
-    compare_text = run_query(compare_query, (review_id,))
+    data=request.get_json()
 
+    review_img_path=data.get("image_urls")
+    award_img_path=data.get("award_img_urls")
+    compare_text=data.get("title")
+
+    print(review_img_path)
+    print(award_img_path)
+    print(compare_text)
     # OCR 실행
     if review_img_path:
       # ocr결과의 기본값은 False
@@ -56,20 +77,19 @@ def evaluate_image(review_id):
       for img_url in review_img_path:
         image_stream = download_image(img_url)
         extracted_text = extract_text(image_stream)
-        ocr_result = compare_texts(extracted_text, compare_text[0])
+        ocr_result = compare_texts(extracted_text, compare_text)
         if ocr_result == "True":
            break
-    if award_img_path[0][0]:
-      award_image_stream = download_image(award_img_path[0])
+    if award_img_path != None:
+      award_image_stream = download_image(award_img_path)
       award_text = extract_text(award_image_stream)
-      award_ocr_result = compare_texts(award_text, compare_text[0])
+      award_ocr_result = compare_texts(award_text, compare_text)
     else:
        award_ocr_result = "None"
 
     try:
-        return jsonify({"ocr_result": ocr_result,
-                        "award_ocr_result": award_ocr_result,
-                        "review_id": review_id}), 200
+        return jsonify({"ocrResult": ocr_result,
+                        "awardOcrResult": award_ocr_result}), 200
     except Exception as e:
         logger.error(e)
         return jsonify({"answer": f"죄송합니다. 에러가 발생했습니다."}), 500

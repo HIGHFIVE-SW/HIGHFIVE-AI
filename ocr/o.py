@@ -18,7 +18,7 @@ ocr = PaddleOCR(lang="korean")
 
 def download_image(img_path):
     """
-    s3에서 이미지 다운로드 후 벡터db나 tmp폴더에 저장
+    s3에서 이미지 다운로드 후 저장
     
     Args:
         img_path (str): s3상에 이미지 경로
@@ -32,27 +32,13 @@ def download_image(img_path):
         region_name=os.getenv("AWS_REGION")  # 원하는 리전
     )
     bucket_name='trendist'
-    file_name = img_path[0]
-    # file_name = "award/0EEC67FEECF943B980D60BF3430FB213"
+    file_name = img_path
     image_stream = BytesIO()
-    print(file_name)
     s3.download_fileobj(bucket_name, file_name, image_stream)
     image_stream.seek(0)
 
     return image_stream
 
-
-# def extract_text(img_path):
-#     """ 
-#     이미지에서 텍스트 추출 
-    
-#     Args:
-#         img_path (str): 이미지의 로컬경로(url)
-#     Returns:
-#         str : ocr이미지에서 추출한 문자열 반환
-#     """
-#     results = ocr.ocr(img_path, cls=True)
-#     return " ".join(text for result in results for _, (text, _) in result)
 
 def extract_text(image_stream):
     """
@@ -67,18 +53,10 @@ def extract_text(image_stream):
     image_stream.seek(0)  # 읽기 위치 초기화
     file_bytes = np.frombuffer(image_stream.getvalue(), dtype=np.uint8)
     img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)  # OpenCV를 사용하여 이미지 디코딩
-    print("ocr수행전전")
     # OCR 수행
     ocr = PaddleOCR(lang='korean')  # 언어 설정 가능
     results = ocr.ocr(img, cls=True)
-    print("ocr수행후")
     return " ".join(text for result in results for _, (text, _) in result)
-
-# 예제 사용법
-# with open("sample.jpg", "rb") as f:
-#     image_stream = BytesIO(f.read())
-#     ocr_result = perform_ocr(image_stream)
-#     print(ocr_result)
 
 def compare_texts(text1, text2):
     """ 
