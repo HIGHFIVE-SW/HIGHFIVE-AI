@@ -1,148 +1,233 @@
 import os
-from os.path import exists, join
-import typing
-from typing import Any
-from datetime import datetime
-
-import faiss
 from dotenv import load_dotenv
-from langchain_community.docstore import InMemoryDocstore
+from datetime import datetime
+from uuid import UUID
+import typing
+from contextlib import contextmanager
+from typing import Any
+
 from langchain_community.document_loaders import SQLDatabaseLoader
 from langchain_community.utilities import SQLDatabase
-from langchain_community.vectorstores import FAISS
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sqlalchemy import create_engine, select, Table, MetaData, and_, or_, null
-
-from .constants import vectorstore_dir, vectorstore_index_name, openai_dimension_size
+from sqlalchemy import create_engine, select, MetaData, Table, bindparam
 
 if typing.TYPE_CHECKING:
     from .bot import Bot
 
+from typing import Optional
+
+from langchain_weaviate import WeaviateVectorStore
+from weaviate.classes.config import Configure, Property, DataType
+from weaviate.classes.query import Filter
+from weaviate.client import WeaviateClient
+
+from server.logger import logger
+from .constants import weaviate_index_name, model
+from .weaviate import connect_weaviate, WeaviateClientContext
+
+from server.db import run_query
+
 load_dotenv()
 
-host = os.getenv('MYSQL_DB_HOST')
-username=os.getenv('MYSQL_DB_USER')
-password=os.getenv('MYSQL_DB_PASSWORD')
-database=os.getenv('MYSQL_DB_NAME')
-
-engine = create_engine(
-    f"mysql+pymysql://{username}:{password}@{host}/{database}",
-    echo=False,  # True일 경우 SQL 로그 출력 (디버깅용)
-    future=True
-)
-
 def get_page_content(row) -> str:
-    return str(row["content"])
+    return str(row["activity_content"])
+
+metadata_mapping = {
+    "activity_id": "activity_id",
+    "activity_name": "activity_name",
+    "activity_type": "activity_type",
+    "site_url": "url",
+    "keyword": "keyword",
+    "start_date": "start_date",
+    "end_date": "end_date",
+}
 
 def get_metadata(row) -> dict[str, Any]:
-    return {
-        "id": row["id"],
-        "name": row["activity_name"],
-        # "type": row["activity_type"],
-        "url": row["site_url"],
-        # "keyword": row["keyword"],
-        "start_date": row["start_date"],
-        "end_date": row["end_date"],
-        "source_site": row["source_site"],
-   }
+    metadata = {}
+
+    # 필드명을 매핑된 키로 변환
+    for k, v in row.items():
+        if v is not None and (new_key:=metadata_mapping.get(k)):
+            if isinstance(v, datetime):
+                # RFC3339 타입. weaviate에서는 date 속성에 대해 이 타입의 문자열을 기대하기 때문에, 이렇게 하지 않으면 에러 발생
+                metadata[new_key] = v.isoformat(timespec="seconds") + "Z"
+            elif isinstance(v, bytes):
+                metadata[new_key] = v.hex()
+            else:
+                metadata[new_key] = v
+
+    return metadata
 
 class VectorStoreMethods:
-    @classmethod
-    def initialize_vectorstore(cls: 'Bot') -> FAISS:
-        faiss_file_path = join(vectorstore_dir, vectorstore_index_name + '.faiss')
-        pkl_file_path = join(vectorstore_dir, vectorstore_index_name + '.pkl')
-        if exists(faiss_file_path) and exists(pkl_file_path):
-            vectorstore: FAISS = FAISS.load_local(folder_path=vectorstore_dir,
-                                                  index_name=vectorstore_index_name,
-                                                  embeddings=cls.embeddings,
-                                                  allow_dangerous_deserialization=True)
-        else:
-            vectorstore: FAISS = FAISS(
-                embedding_function=cls.embeddings,
-                index=faiss.IndexFlatL2(openai_dimension_size), # IndexFlatL2는 정확도가 높고 속도가 느려, 작은 데이터셋에 적합한 인덱싱 함수.
-                docstore=InMemoryDocstore(),
-                index_to_docstore_id={}
-            )
+    """Weaviate 벡터스토어 연동 및 동기화 관련 메서드를 제공하는 클래스입니다."""
 
-        return vectorstore
+    @staticmethod
+    def get_vectorstore(weaviate_client: Optional[WeaviateClient] = None) -> WeaviateVectorStore:
+        """Weaviate 벡터스토어 인스턴스를 반환합니다.
 
-    @classmethod
-    def update_vectorstore(cls:'Bot'):
-        ##### 단계 1: 문서 로드(Load Documents) #####
-        # vectorstore에 저장된 모든 id(=activity.activity_id) 확인
-        ids_in_vectorstore:set[str] = {
-            str(doc.metadata.get("id"))
-            for doc_id in cls.vectorstore.index_to_docstore_id.values()
-            for doc in [cls.vectorstore.docstore.search(doc_id)]
-            if "id" in doc.metadata
-        }
+        Args:
+            weaviate_client (Optional[WeaviateClient]): 외부에서 전달받은 클라이언트 (없으면 새로 연결)
 
-        # SQL alchemy로 activity 컬럼에서 모든 id 조회
-        metadata = MetaData()
-        activity_table = Table("activities", metadata, autoload_with=engine)
-        now = datetime.now()
-        stmt = select(activity_table.c.id).where(
-            and_(
-                or_(activity_table.c.start_date.is_(None), activity_table.c.start_date <= now),
-                or_(activity_table.c.end_date.is_(None), activity_table.c.end_date >= now)
-            )
+        Returns:
+            WeaviateVectorStore: 벡터스토어 인스턴스
+        """
+        # 먼저 스키마 등록
+        with WeaviateClientContext() as client:
+            VectorStoreMethods.register_schema(client)
+
+        return WeaviateVectorStore(
+            client=weaviate_client if weaviate_client else connect_weaviate(),
+            index_name="Activities",
+            text_key="activity_content",
         )
-        # stmt에 조건을 추가하려면 .where(activity_table.c.end_date < datetime.now())와 같이 .where() 메서드를 사용
-        print(str(stmt.compile(compile_kwargs={"literal_binds": True})))
-        with engine.connect() as conn:
-            results = conn.execute(stmt).fetchall()
 
-        from server.logger import logger
-        logger.debug(f"벡터스토어에서 retrieve: {len(results)}개의 활동 조회")
-        # 결과 추출
-        activity_ids:set[str] = {str(row[0]) for row in results}
+    @staticmethod
+    def register_schema(weaviate_client: WeaviateClient) -> None:
+        """Weaviate에 스키마를 등록합니다.
 
-        ids_to_add:list[str] = [
-            doc_id for doc_id in activity_ids
-            if not doc_id in ids_in_vectorstore
-        ]
-        ids_to_delete:list[str] = [
-            doc_id for doc_id in ids_in_vectorstore
-            if not doc_id in activity_ids
-        ]
+        Args:
+            weaviate_client (WeaviateClient): Weaviate 클라이언트
+        """
+        # 먼저 클래스가 존재하는지 확인
+        if weaviate_index_name in weaviate_client.collections.list_all().keys():
+            logger.info(f"{weaviate_index_name} already exists in Weaviate.")
+            return
 
-        # 제거할 문서는 제거
-        if ids_to_delete: # delete() 메서드에 빈 배열 입력 시 오류 발생 -> 배열이 있을 때만 호출
-            cls.vectorstore.delete(ids_to_delete)
+        weaviate_client.collections.create(
+            weaviate_index_name,
+            description="Activity information of Trendist",
+            reranker_config=Configure.Reranker.cohere(),
+            vectorizer_config=Configure.Vectorizer.text2vec_huggingface(
+                    model="BAAI/bge-m3",  # The model to use, e.g. "nomic-embed-text"
+                ),
+            properties=[  # properties configuration is optional
+                Property(name="activity_id", data_type=DataType.TEXT),
+                Property(name="activity_name", data_type=DataType.TEXT),
+                Property(name="activity_type", data_type=DataType.TEXT),
+                Property(name="activity_content", data_type=DataType.TEXT),
+                Property(name="keyword", data_type=DataType.TEXT),
+                Property(name="url", data_type=DataType.TEXT),
+                Property(name="start_date", data_type=DataType.DATE),
+                Property(name="end_date", data_type=DataType.DATE),
+            ]
+        )
+        logger.info("Activities vectorstore schema is created in Weaviate.")
 
-        # 추가할 문서는 추가
-        # placeholder와 parameters를 미리 지정해서 SQLAlchemy 방식(:param)으로 바인딩
-        if not ids_to_add:
-            return # 추가할 문서가 없을 경우 종료
-        
-        placeholders = []
-        parameters = {}
-        for i, val in enumerate(ids_to_add):
-            key = f"id_{i}"
-            placeholders.append(f":{key}")
-            parameters[key] = val
-        
-        loader = SQLDatabaseLoader(query=f"""
-        SELECT `id`, `activity_name`, `content`, `site_url`, `start_date`, `end_date`, `source_site` 
-        FROM activities WHERE `id` IN ({",".join(placeholders)});""",
-                                   parameters=parameters,
-                                   db=SQLDatabase(engine),
-                                   page_content_mapper=get_page_content,
-                                   metadata_mapper=get_metadata)
-        docs = loader.load()
+    @classmethod
+    def update_vectorstore(cls: 'Bot'):
+        """MySQL과 Weaviate 벡터스토어를 동기화합니다.
 
-        # 단계 2: 문서 분할(Split Documents)
-        text_splitter:RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
-        split_documents:list[Document] = text_splitter.split_documents(docs)
+        Returns:
+            None
+        """
+        with WeaviateClientContext() as weaviate_client:
+            weaviate_client.connect()
+            ##### 1. Weaviate에서 activity_id 필터로 모든 _id 가져오기 #####
+            weaviate_ids: set[str] = set()
 
-        # 단계 3: 임베딩(Embedding) 생성
-        # 임베딩을 생성한다.
-        # embedding = OpenAIEmbeddings()  # -> self._embedding 으로 저장한다음 바로 참조하기 때문에 생략됨
+            collection = weaviate_client.collections.get(weaviate_index_name)
+            response = collection.query.fetch_objects(
+                limit=10000,  # 10000이 최대인듯. 100000으로 하면 query maximum result exceeded 오류 발생
+            )
 
-        # 단계 4: DB 생성(Create DB) 및 저장
-        # 벡터스토어를 생성하고, 저장한다.
+            # 중복 제거용 dict: {(channelId, chatId): [uuid1, uuid2, ...]}
+            duplicates: dict[str, list[str]] = {}
 
-        cls.vectorstore.add_documents(documents=split_documents, embedding=cls.embeddings)
-        cls.vectorstore.save_local(folder_path=vectorstore_dir,
-                                   index_name=vectorstore_index_name)
+            for o in response.objects:
+                props = o.properties or {}
+                uuid = o.uuid
+                activity_id = props.get("activity_id")
+                weaviate_ids.add(activity_id)
+
+                # activity_id가 중복되는 object의 uuid를 기록
+                duplicates.setdefault(activity_id, []).append(uuid)
+
+            # 중복된 activity id에서 첫 번째를 제외한 나머지를 삭제
+            for activity_id, uuid_list in duplicates.items():
+                if len(uuid_list) > 1:
+                    # 첫 번째는 유지, 나머지 삭제
+                    to_delete = uuid_list[1:]
+                    if to_delete:
+                        logger.warning(
+                            f"Deleting duplicate Weaviate object: "
+                            f"activity_id={activity_id}, "
+                            f"uuid=(survived: {uuid_list[0]}, killed: {to_delete})")
+
+                        collection.data.delete_many(
+                            where=Filter.any_of([
+                                Filter.by_id().equal(uuid) for uuid in uuid_list
+                            ])
+                        )
+
+
+            ##### 2. MySQL에서 전체 id 리스트 확보 #####
+            mysql_ids = {row['activity_id'].hex() for row in run_query("SELECT activity_id FROM activities")}
+            logger.debug(f"MySQL에서 전체 activity id 리스트 확보: {len(mysql_ids)}개")
+
+            ##### 3. 차집합: MySQL에는 있고 Weaviate에는 없는 id #####
+            missing_activity_ids:list[bytes] = [UUID(aid).bytes for aid in (mysql_ids - weaviate_ids)]
+            logger.info(f"MySQL에는 있고 Weaviate에는 업데이트되지 않은 activity id 리스트 확보: {len(mysql_ids)}개")
+
+
+            ##### 4. MySQL에서 레코드 로드 후 Weaviate에 추가 #####
+            if missing_activity_ids:
+                with cls.build_loader(missing_activity_ids) as loader:
+                    if docs := loader.load():  # 문서 목록이 비어 있지 않을 때만 추가(비어 있을 경우 add_documents() 에서 오류 발생)
+                        # 단계 4: DB 생성(Create DB) 및 저장
+                        # 벡터스토어를 생성하고, 저장한다.
+                        docs = [doc for doc in docs if doc]
+                        print(docs)
+                        logger.debug(f"Adding documents to the vectorstore.")
+                        cls.vectorstore.add_documents(docs)
+
+            if weaviate_client.batch.failed_objects:
+                for failed in weaviate_client.batch.failed_objects:
+                    logger.error(f"Failed to insert documents into weaviate: {failed}")
+
+    @staticmethod
+    @contextmanager
+    def build_loader(ids: list[bytes]) -> SQLDatabaseLoader:
+        """MySQL에서 지정된 ID의 채팅 데이터를 로드하는 Document 로더를 반환합니다.
+
+        Args:
+            ids (list[str]): 로드할 채팅의 activity_id 목록
+
+        Returns:
+            SQLDatabaseLoader: MySQL Database 로더
+        """
+        host = os.getenv('MYSQL_DB_HOST')
+        username = os.getenv('MYSQL_DB_USER')
+        password = os.getenv('MYSQL_DB_PASSWORD')
+        database = os.getenv('MYSQL_DB_NAME')
+
+        # 연결 및 DB 유틸리티 생성
+        engine = create_engine(
+            f"mysql+pymysql://{username}:{password}@{host}/{database}",
+            echo=True,  # SQL 로그 출력 (디버깅용)
+            future=True
+        )
+        db = SQLDatabase(engine)
+
+        # 테이블 메타정보 준비
+        metadata = MetaData()
+        activities = Table("activities", metadata, autoload_with=engine)
+
+        # Select 객체 + 리스트 바인딩. Select 객체가 아닌 문자열만 사용하면 리스트 바인딩은 불가능.
+        query = (
+            select(activities)
+            .where(activities.c.activity_id.in_(bindparam("ids", expanding=True)))
+        )
+
+        # SQLDatabaseLoader 생성
+        loader = SQLDatabaseLoader(
+            query=query,
+            db=db,
+            parameters={"ids": ids},  # 리스트 바인딩
+            page_content_mapper=get_page_content,
+            metadata_mapper=get_metadata
+        )
+
+
+        try:
+            yield loader
+        finally:
+            engine.dispose()  # 안전하게 연결 종료

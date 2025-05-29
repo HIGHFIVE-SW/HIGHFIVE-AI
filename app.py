@@ -1,10 +1,9 @@
+from server.logger import logger
 import os
 import sys
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
-
-from server.logger import logger
 
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,9 +26,15 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 from chat import chat_bp
 app.register_blueprint(chat_bp)
 
-from ocr import ocr_bp
-app.register_blueprint(ocr_bp)
+# from ocr import ocr_bp
+# app.register_blueprint(ocr_bp)
+
+# logger.debug('DEBUG logging test.')
+# logger.info('INFO logging test.')
+# logger.warning('WARNING logging test.')
+# logger.error('ERROR logging test.')
+# logger.critical('CRITICAL logging test.')
 
 if __name__ == "__main__":
-    logger.info("Flask server has started!")
+    logger.debug("Flask server has started!")
     app.run(host="0.0.0.0", port=5000)

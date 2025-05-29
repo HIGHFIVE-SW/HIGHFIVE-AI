@@ -176,7 +176,7 @@ consoleHandler.addFilter(ModuleFilter(allowed_prefixes=["werkzeug"]))
 
 # handler 인자로 입력한 리스트의 핸들러가 순차적으로 실행되므로,
 # 로그의 형식 변경 -> 로그 파일에 기록 -> 콘솔에 출력 시의 색상 변경의 순으로 작동한다.
-logging.basicConfig(level='DEBUG', handlers=[logFileHandler, consoleHandler])
+logging.basicConfig(level=logging.DEBUG, handlers=[logFileHandler, consoleHandler])
 
 
 logger = logging.getLogger(__name__)

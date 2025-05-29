@@ -1,6 +1,11 @@
+from typing import Optional
+
 from mysql.connector import pooling
+from mysql.connector.cursor import MySQLCursorDict
+from mysql.connector.pooling import PooledMySQLConnection
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
 pool = pooling.MySQLConnectionPool(
@@ -13,9 +18,9 @@ pool = pooling.MySQLConnectionPool(
     password=os.getenv("MYSQL_DB_PASSWORD")
 )
 
-def run_query(query: str, params=None):
-    conn = pool.get_connection()
-    cursor = conn.cursor()
+def run_query(query: str, params:Optional[tuple]=None):
+    conn: PooledMySQLConnection = pool.get_connection()
+    cursor: MySQLCursorDict  = conn.cursor(dictionary=True)
     cursor.execute(query, params)
     results = cursor.fetchall()
     cursor.close()
