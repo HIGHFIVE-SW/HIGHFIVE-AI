@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flasgger import Swagger, swag_from
-from server.db import run_query
+
 from server.logger import logger
 from .o import download_image, extract_text, compare_texts
 
@@ -63,8 +63,8 @@ def evaluate_image():
 
     data=request.get_json()
 
-    review_img_path=data.get("image_urls")
-    award_img_path=data.get("award_img_urls")
+    review_img_path=data.get("imageUrls")
+    award_img_path=data.get("awardImgUrl")
     compare_text=data.get("title")
 
     print(review_img_path)
@@ -77,6 +77,7 @@ def evaluate_image():
       for img_url in review_img_path:
         image_stream = download_image(img_url)
         extracted_text = extract_text(image_stream)
+        print(extracted_text)
         ocr_result = compare_texts(extracted_text, compare_text)
         if ocr_result == "True":
            break
@@ -85,7 +86,7 @@ def evaluate_image():
       award_text = extract_text(award_image_stream)
       award_ocr_result = compare_texts(award_text, compare_text)
     else:
-       award_ocr_result = "None"
+       award_ocr_result = "False"
 
     try:
         return jsonify({"ocrResult": ocr_result,

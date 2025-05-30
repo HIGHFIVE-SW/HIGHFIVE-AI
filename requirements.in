@@ -18,12 +18,12 @@ openai
 # OCR
 paddleocr
 paddlepaddle
+# gpu 사용할 경우 해당 패키지 포함 
+#paddlepaddle-gpu==2.5.0.post118
 
 # MySQL
 mysql-connector-python
 
-#boto3
-boto3
 # 새로운 패키지
 # package-name
 

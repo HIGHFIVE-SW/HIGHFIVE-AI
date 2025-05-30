@@ -1,8 +1,8 @@
 import torch
 import os
-import boto3
 import numpy as np
 import cv2
+import requests
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from openai import OpenAI
@@ -18,24 +18,22 @@ ocr = PaddleOCR(lang="korean")
 
 def download_image(img_path):
     """
-    s3에서 이미지 다운로드 후 저장
+    s3에서 이미지 다운로드 후 바이트스트림에 저장
     
     Args:
         img_path (str): s3상에 이미지 경로
     Returns:
         BytesIO: 이미지 데이터의 바이트스트림 객체
     """
-    s3 = boto3.client(
-        's3',
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION")  # 원하는 리전
-    )
-    bucket_name='trendist'
-    file_name = img_path
-    image_stream = BytesIO()
-    s3.download_fileobj(bucket_name, file_name, image_stream)
-    image_stream.seek(0)
+
+    presigned_url = img_path
+    print("presigned_url", presigned_url)
+    # 이미지 다운로드 (바이너리 형태)
+    response = requests.get(presigned_url)
+
+# 응답 확인 및 메모리에 저장
+    if response.status_code == 200:
+        image_stream = BytesIO(response.content)
 
     return image_stream
 
