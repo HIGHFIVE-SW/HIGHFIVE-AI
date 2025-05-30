@@ -9,27 +9,26 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4"
 
-def summarize_translate_en_to_ko(text: str) -> str:
+def translate_en_to_ko(text: str) -> str:
     """
-    영어 텍스트를 한국어로 번역하고 요약.
+    영어 텍스트를 한국어로 번역.
 
     Args:
         text (str): 번역하고자 하는 원문(영어) 텍스트
     Returns: 
-        str: 요약된 한국어 번역 결과
+        str: 한국어 번역 결과
     """
     prompt = f"""
-    Translate and summarize the following English text **into Korean** in **one or two sentences only**.
-    Focus on capturing the key message, and write naturally in Korean.
+    Translate the following English text **into Korean**.
+    Maintain the original tone and context as accurately as possible.
 
-    Text:
     {text}
     """
 
     response = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": "You are a professional translator and summarizer."},
+            {"role": "system", "content": "You are a professional translator."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.3,
