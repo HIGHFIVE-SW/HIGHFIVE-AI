@@ -14,12 +14,7 @@ scikit-learn
 
 # Generative AI
 openai
-
-# OCR
-paddleocr
-paddlepaddle
-# gpu 사용할 경우 해당 패키지 포함 
-#paddlepaddle-gpu==2.5.0.post118
+google-genai>=0.1.0
 
 # MySQL
 mysql-connector-python

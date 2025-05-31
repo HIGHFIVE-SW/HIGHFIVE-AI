@@ -4,34 +4,21 @@
 #
 #    pip-compile requirements.in
 #
-albucore==0.0.24
-    # via
-    #   albumentations
-    #   paddleocr
-albumentations==2.0.6
-    # via paddleocr
 annotated-types==0.7.0
     # via pydantic
 anyio==4.9.0
     # via
+    #   google-genai
     #   httpx
     #   openai
-astor==0.8.1
-    # via paddlepaddle
 attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
-beautifulsoup4==4.13.4
-    # via paddleocr
 blinker==1.9.0
     # via flask
-boto3==1.38.23
-    # via -r requirements.in
-botocore==1.38.23
-    # via
-    #   boto3
-    #   s3transfer
+cachetools==5.5.2
+    # via google-auth
 certifi==2025.1.31
     # via
     #   httpcore
@@ -45,10 +32,6 @@ colorama==0.4.6
     # via
     #   click
     #   tqdm
-cython==3.1.0
-    # via paddleocr
-decorator==5.2.1
-    # via paddlepaddle
 distro==1.9.0
     # via openai
 filelock==3.18.0
@@ -56,8 +39,6 @@ filelock==3.18.0
     #   huggingface-hub
     #   torch
     #   transformers
-fire==0.7.0
-    # via paddleocr
 flasgger==0.9.7.1
     # via -r requirements.in
 flask==3.1.0
@@ -67,20 +48,22 @@ flask==3.1.0
     #   flask-cors
 flask-cors==5.0.1
     # via -r requirements.in
-fonttools==4.58.0
-    # via paddleocr
 fsspec==2025.3.2
     # via
     #   huggingface-hub
     #   torch
+google-auth==2.40.2
+    # via google-genai
+google-genai==1.18.0
+    # via -r requirements.in
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via
+    #   google-genai
     #   openai
-    #   paddlepaddle
 huggingface-hub==0.31.1
     # via
     #   tokenizers
@@ -90,8 +73,6 @@ idna==3.10
     #   anyio
     #   httpx
     #   requests
-imageio==2.37.0
-    # via scikit-image
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
@@ -100,22 +81,12 @@ jinja2==3.1.6
     #   torch
 jiter==0.9.0
     # via openai
-jmespath==1.0.1
-    # via
-    #   boto3
-    #   botocore
 joblib==1.5.0
     # via scikit-learn
 jsonschema==4.23.0
     # via flasgger
 jsonschema-specifications==2025.4.1
     # via jsonschema
-lazy-loader==0.4
-    # via scikit-image
-lmdb==1.6.2
-    # via paddleocr
-lxml==5.4.0
-    # via python-docx
 markupsafe==3.0.2
     # via
     #   jinja2
@@ -127,81 +98,38 @@ mpmath==1.3.0
 mysql-connector-python==9.3.0
     # via -r requirements.in
 networkx==3.4.2
-    # via
-    #   paddlepaddle
-    #   scikit-image
-    #   torch
+    # via torch
 numpy==2.2.5
     # via
-    #   albucore
-    #   albumentations
-    #   imageio
-    #   opencv-contrib-python
-    #   opencv-python
-    #   opencv-python-headless
-    #   opt-einsum
-    #   paddleocr
-    #   paddlepaddle
-    #   scikit-image
     #   scikit-learn
     #   scipy
-    #   shapely
-    #   tifffile
     #   transformers
 openai==1.78.1
     # via -r requirements.in
-opencv-contrib-python==4.11.0.86
-    # via paddleocr
-opencv-python==4.11.0.86
-    # via paddleocr
-opencv-python-headless==4.11.0.86
-    # via
-    #   albucore
-    #   albumentations
-opt-einsum==3.3.0
-    # via paddlepaddle
 packaging==25.0
     # via
     #   flasgger
     #   huggingface-hub
-    #   lazy-loader
-    #   scikit-image
     #   transformers
-paddleocr==2.10.0
-    # via -r requirements.in
-paddlepaddle==3.0.0
-    # via -r requirements.in
-pillow==11.2.1
+pyasn1==0.6.1
     # via
-    #   imageio
-    #   paddleocr
-    #   paddlepaddle
-    #   scikit-image
-protobuf==6.31.0
-    # via paddlepaddle
-pyclipper==1.3.0.post6
-    # via paddleocr
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.4.2
+    # via google-auth
 pydantic==2.11.4
     # via
-    #   albumentations
+    #   google-genai
     #   openai
 pydantic-core==2.33.2
     # via pydantic
-python-dateutil==2.9.0.post0
-    # via botocore
-python-docx==1.1.2
-    # via paddleocr
 python-dotenv==1.1.0
     # via -r requirements.in
 pyyaml==6.0.2
     # via
-    #   albumentations
     #   flasgger
     #   huggingface-hub
-    #   paddleocr
     #   transformers
-rapidfuzz==3.13.0
-    # via paddleocr
 referencing==0.36.2
     # via
     #   jsonschema
@@ -211,50 +139,31 @@ regex==2024.11.6
 requests==2.32.3
     # via
     #   -r requirements.in
+    #   google-genai
     #   huggingface-hub
-    #   paddleocr
     #   transformers
 rpds-py==0.24.0
     # via
     #   jsonschema
     #   referencing
-s3transfer==0.13.0
-    # via boto3
+rsa==4.9.1
+    # via google-auth
 safetensors==0.5.3
     # via transformers
-scikit-image==0.25.2
-    # via paddleocr
 scikit-learn==1.6.1
     # via -r requirements.in
 scipy==1.15.3
-    # via
-    #   albumentations
-    #   scikit-image
-    #   scikit-learn
-shapely==2.1.0
-    # via paddleocr
-simsimd==6.2.1
-    # via albucore
+    # via scikit-learn
 six==1.17.0
-    # via
-    #   flasgger
-    #   python-dateutil
+    # via flasgger
 sniffio==1.3.1
     # via
     #   anyio
     #   openai
-soupsieve==2.7
-    # via beautifulsoup4
-stringzilla==3.12.5
-    # via albucore
 sympy==1.14.0
     # via torch
-termcolor==3.1.0
-    # via fire
 threadpoolctl==3.6.0
     # via scikit-learn
-tifffile==2025.5.10
-    # via scikit-image
 tokenizers==0.21.1
     # via transformers
 torch==2.7.0
@@ -263,29 +172,26 @@ tqdm==4.67.1
     # via
     #   huggingface-hub
     #   openai
-    #   paddleocr
     #   transformers
 transformers==4.51.3
     # via -r requirements.in
 typing-extensions==4.13.2
     # via
     #   anyio
-    #   beautifulsoup4
+    #   google-genai
     #   huggingface-hub
     #   openai
-    #   paddlepaddle
     #   pydantic
     #   pydantic-core
-    #   python-docx
     #   referencing
     #   torch
     #   typing-inspection
 typing-inspection==0.4.0
     # via pydantic
 urllib3==2.3.0
-    # via
-    #   botocore
-    #   requests
+    # via requests
+websockets==15.0.1
+    # via google-genai
 werkzeug==3.1.3
     # via
     #   flask

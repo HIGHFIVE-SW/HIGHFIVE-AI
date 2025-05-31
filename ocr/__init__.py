@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flasgger import Swagger, swag_from
 
 from server.logger import logger
-from .o import download_image, extract_text, compare_texts
+from .o import is_review_valid
 
 ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 
@@ -63,28 +63,17 @@ def evaluate_image():
 
     data=request.get_json()
 
-    review_img_path=data.get("imageUrls")
-    award_img_path=data.get("awardImgUrl")
-    compare_text=data.get("title")
+    imageUrls=data.get("imageUrls")
+    awardImgUrl=data.get("awardImgUrl")
+    title=data.get("title")
 
-    print(review_img_path)
-    print(award_img_path)
-    print(compare_text)
     # OCR 실행
-    if review_img_path:
+    if imageUrls:
       # ocr결과의 기본값은 False
       ocr_result = "False"
-      for img_url in review_img_path:
-        image_stream = download_image(img_url)
-        extracted_text = extract_text(image_stream)
-        print(extracted_text)
-        ocr_result = compare_texts(extracted_text, compare_text)
-        if ocr_result == "True":
-           break
-    if award_img_path != None:
-      award_image_stream = download_image(award_img_path)
-      award_text = extract_text(award_image_stream)
-      award_ocr_result = compare_texts(award_text, compare_text)
+      ocr_result=is_review_valid(title, imageUrls)
+    if awardImgUrl != None:
+       award_ocr_result=is_review_valid(title,awardImgUrl)
     else:
        award_ocr_result = "False"
 
