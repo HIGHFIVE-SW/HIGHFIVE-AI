@@ -1,89 +1,82 @@
 import torch
 import os
-import numpy as np
-import cv2
 import requests
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from openai import OpenAI
-from io import BytesIO
 
 # .env파일 로드
 load_dotenv()
 
-# 환경 변수에서 API 키 가져오기
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-model = "gpt-4"
-ocr = PaddleOCR(lang="korean")
+api_key = os.getenv("GEMINI_API_KEY")
+MODEL_NAME = "gemini-1.5-flash"
 
-def download_image(img_path):
+def is_review_valid(title: str, image_urls: list[str]) -> bool:
     """
-    s3에서 이미지 다운로드 후 바이트스트림에 저장
+    리뷰 제목과 이미지들을 기반으로 리뷰가 유효한지 판단합니다.
     
     Args:
-        img_path (str): s3상에 이미지 경로
+        title (str): 리뷰 제목
+        image_urls (list[str]): 이미지 URL 리스트 (최대 5개 권장)
+        
     Returns:
-        BytesIO: 이미지 데이터의 바이트스트림 객체
+        bool: 리뷰가 유효하면 True, 그렇지 않으면 False
     """
-
-    presigned_url = img_path
-    print("presigned_url", presigned_url)
-    # 이미지 다운로드 (바이너리 형태)
-    response = requests.get(presigned_url)
-
-# 응답 확인 및 메모리에 저장
-    if response.status_code == 200:
-        image_stream = BytesIO(response.content)
-
-    return image_stream
-
-
-def extract_text(image_stream):
-    """
-    BytesIO 객체의 이미지를 대상으로 OCR 수행
     
-    Args:
-        image_stream (BytesIO): 메모리에 저장된 이미지 데이터
-    Returns:
-        list: OCR 결과
-    """
-    # 스트림을 numpy 배열로 변환
-    image_stream.seek(0)  # 읽기 위치 초기화
-    file_bytes = np.frombuffer(image_stream.getvalue(), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)  # OpenCV를 사용하여 이미지 디코딩
-    # OCR 수행
-    ocr = PaddleOCR(lang='korean')  # 언어 설정 가능
-    results = ocr.ocr(img, cls=True)
-    return " ".join(text for result in results for _, (text, _) in result)
+    image_parts = []
 
-def compare_texts(text1, text2):
-    """ 
-    ocr로 추출한 텍스트와 활동 제목 간의 관계 분석
+    # 각 이미지 URL을 순회하며 이미지 바이트를 가져와 types.Part 객체로 변환
+    for url in image_urls[:5]: # 최대 5개 이미지만 처리
+        if url: # URL이 비어있지 않은지 확인
+            try:
+                response = requests.get(url, timeout=5) # 타임아웃 추가
+                response.raise_for_status() # HTTP 오류 (4xx, 5xx) 발생 시 예외 발생
+                
+                # MIME 타입 확인 (없으면 기본값 사용)
+                content_type = response.headers.get('Content-Type', 'image/jpeg')
+                
+                # 이미지 바이트를 types.Part 객체로 변환하고 리스트에 추가
+                image_part = types.Part.from_bytes(data=response.content, mime_type=content_type) 
+                image_parts.append(image_part)
+            except requests.exceptions.RequestException as e:
+                print(f"경고: 이미지를 가져오거나 처리하는 데 실패했습니다. URL: {url}, 오류: {e}")
+                continue
+            except Exception as e:
+                print(f"경고: 이미지 {url} 처리 중 예상치 못한 오류 발생: {e}")
+                continue
 
-    Args:
-        text1 (str): 이미지에서 추출한 문자열
-        text2 (str): 활동 제목에서의 문자열
-    Returns:
-         str: 관련이 있다 판단 시 True / 없다 판단 시 False를 반환
-    """
-    prompt = f"""
-    Analyze the relationship between the following two texts. Determine whether they are conceptually or contextually related.
-    If they are related, return True; otherwise, return False without additional explanation
+    if not image_parts:
+        print("경고: 유효한 이미지를 찾거나 가져오지 못했습니다. False를 반환합니다.")
+        return False # 이미지가 없거나 모두 실패하면 유효하지 않다고 판단
 
-    Text 1:
-    {text1}
-    Text 2:
-    {text2}
+    prompt = f"""리뷰 제목: "{title}"
+    리뷰의 제목과, 이미지들에 포함된 텍스트를 하나씩 비교합니다. 
+    하나라도 맞는 경우 문자열 True를 모두 아닐 경우 False를 반환합니다.
     """
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": "You are an objective analyst. Compare the following two texts and determine their relationship strictly based on content."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0,
-        max_tokens=600
-    )
+    # 텍스트 프롬프트와 모든 이미지 파트를 contents 리스트로 결합
+    contents = [prompt] + image_parts
 
-    return response.choices[0].message.content.strip()
+    client = genai.Client(api_key=api_key)
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=contents,
+            config={
+                # 응답형식을 True, False로 제한
+                'response_mime_type': 'text/x.enum',
+                'response_schema': {
+                    "type": "STRING",
+                    "enum": ["True", "False"]
+                }
+            }
+        )
+
+        print("responsetext: ",response.text)
+        return response.text.strip() == "True"
+
+    except Exception as e:
+        print(f"API 호출 실패: {e}")
+        return False # API 호출 실패 시 유효하지 않다고 판단
