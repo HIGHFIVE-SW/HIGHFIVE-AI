@@ -71,9 +71,11 @@ def evaluate_image():
     if imageUrls:
       # ocr결과의 기본값은 False
       ocr_result = "False"
-      ocr_result=is_review_valid(title, imageUrls)
+      ocr_result=is_review_valid(title, imageUrls)    
     if awardImageUrl != None:
-       award_ocr_result=is_review_valid(title,awardImageUrl)
+       awardImageUrlList=[awardImageUrl]
+       print("awardImgUrl",awardImageUrlList)
+       award_ocr_result=is_review_valid(title,awardImageUrlList)
     else:
        award_ocr_result = "False"
 
