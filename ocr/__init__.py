@@ -18,12 +18,12 @@ ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
             'schema': {
                 'type': 'object',
                 'properties': {
-                    'image_urls': {
+                    'imageUrls': {
                         'type': 'array',
                         'items': {'type': 'string'},
                         'description': '검토할 이미지 URL 리스트'
                     },
-                    'award_img_urls': {
+                    'awardImageUrl': {
                         'type': 'string',
                         'description': '수상 이미지의 URL'
                     },
@@ -64,7 +64,7 @@ def evaluate_image():
     data=request.get_json()
 
     imageUrls=data.get("imageUrls")
-    awardImgUrl=data.get("awardImgUrl")
+    awardImageUrl=data.get("awardImageUrl")
     title=data.get("title")
 
     # OCR 실행
@@ -72,8 +72,8 @@ def evaluate_image():
       # ocr결과의 기본값은 False
       ocr_result = "False"
       ocr_result=is_review_valid(title, imageUrls)
-    if awardImgUrl != None:
-       award_ocr_result=is_review_valid(title,awardImgUrl)
+    if awardImageUrl != None:
+       award_ocr_result=is_review_valid(title,awardImageUrl)
     else:
        award_ocr_result = "False"
 
