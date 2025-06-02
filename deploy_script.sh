@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd HIGHFIVE-AI/ || exit
+cd ~/HIGHFIVE-AI/ || exit
 
 # 패키지 업데이트 및 설치
 pip-compile requirements.in
