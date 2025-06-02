@@ -6,6 +6,7 @@ cd ~/HIGHFIVE-AI/ || exit
 pip-compile requirements.in
 pip install -r requirements.txt
 
-# 애플리케이션 실행
-screen -dmS cicd python app.py
+# 기존의 스크린 삭제 후 재실행
+screen -S flask-server -X quit
+screen -dmS flask-server bash -c "cd ~/HIGHFIVE-AI && python app.py"
 echo "Flask is running in a screen session."
