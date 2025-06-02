@@ -74,7 +74,6 @@ def evaluate_image():
       ocr_result=is_review_valid(title, imageUrls)    
     if awardImageUrl != None:
        awardImageUrlList=[awardImageUrl]
-       print("awardImgUrl",awardImageUrlList)
        award_ocr_result=is_review_valid(title,awardImageUrlList)
     else:
        award_ocr_result = "False"
