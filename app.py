@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flasgger import Swagger
 
 from server.logger import logger
-
+#test
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
