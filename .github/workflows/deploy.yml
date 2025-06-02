@@ -12,8 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Check workspace directory
+        run: echo "current workspace${{ github.workspace }}"
+
       - name: Set execute permissions for deploy script
-        run: chmod +x ${{ github.workspace }}/deploy_script.sh
+        run: chmod +x ${{ github.workspace }}/HIGHFIVE-AI/deploy_script.sh
 
 
       - name: Setup SSH Key
