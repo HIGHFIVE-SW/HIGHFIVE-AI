@@ -7,4 +7,5 @@ pip-compile requirements.in
 pip install -r requirements.txt
 
 # 애플리케이션 실행
-python app.py
+screen -dmS cicd python app.py
+echo "Flask is running in a screen session."
