@@ -13,11 +13,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set execute permissions for deploy script
-        run: chmod +x deploy_script.sh
+        run: |
+          cd ~/HIGHFIVE-AI/
+          chmod +x deploy_script.sh
 
 
       - name: Setup SSH Key
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa.pem
           chmod 600 id_rsa.pem
+          
           ssh -i id_rsa.pem -o StrictHostKeyChecking=no elicer@central-01.tcp.tunnel.elice.io -p 50735 "cd ~/HIGHFIVE-AI/ && git reset --hard origin/main && git pull origin main && ./deploy_script.sh"
