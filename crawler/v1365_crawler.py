@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from server.db import run_query
 from crawler.save_to_db import save_activities
-from crawler.keyword_extractor import extract_keyword
+from crawler.activity_processor import extract_keyword
 from itertools import chain
 
 LIST_ENDPOINT = "https://www.1365.go.kr/vols/1572247904127/partcptn/timeCptn.do"

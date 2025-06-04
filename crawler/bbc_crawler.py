@@ -1,6 +1,5 @@
 import requests
-from crawler.keyword_extractor import extract_keyword
-from summarization.sum_translate import translate_en_to_ko
+from crawler.issue_processor import translate_and_categorize
 from crawler.save_to_db import save_issues
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -70,9 +69,7 @@ def get_articles(page, collection_id, end_time):
             if is_end(date, end_time):
                 break
 
-        title = translate_en_to_ko(data['title'])
-        keyword = extract_keyword(data['summary'])
-        summary = translate_en_to_ko(data['summary'])
+        title, summary, keyword = translate_and_categorize(data['title'], data['summary'])
         url = "https://www.bbc.com" + data['path']
         image = data['indexImage']['model']['blocks']['src'] or None
 
@@ -118,11 +115,6 @@ def crawl():
         save_issues(results)
     else:
         print("[BBC] 크롤링 완료 : 새로운 이슈가 없습니다.")
-    
-    
-
-def main():
-    crawl()
 
 if __name__ == '__main__':
-    main()
+    crawl()

@@ -1,12 +1,11 @@
 import requests
-import time
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from server.db import run_query
 from crawler.save_to_db import save_activities
-from crawler.keyword_extractor import extract_keyword
+from crawler.activity_processor import extract_keyword
 
 BASE_URL = "https://www.wevity.com"
 FILE_NAME = "data/wevity_data.json"
@@ -175,7 +174,6 @@ def crawl():
         print("[WEVITY] 활동 상세내용 크롤링 중...")
         for url in collected_urls:
             activity_data = get_activity_detail(url)
-            time.sleep(1.1) # LLM API 요청 간 시간 간격을 두기 위해 1.1초 대기
             if activity_data:
                 crawled_activities.append(activity_data)
                 print(f"[WEVITY] 활동 크롤링 완료 : {activity_data['activity_name']}")
