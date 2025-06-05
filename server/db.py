@@ -16,8 +16,23 @@ pool = pooling.MySQLConnectionPool(
 def run_query(query: str, params=None):
     conn = pool.get_connection()
     cursor = conn.cursor()
-    cursor.execute(query, params)
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()  # 풀로 반환
-    return results
+    try:
+        affected_rows = 0
+
+        # 여러 레코드 삽입인 경우
+        if params and isinstance(params, list) and isinstance(params[0], tuple):
+            cursor.executemany(query, params)
+            affected_rows = cursor.rowcount
+        else:
+            cursor.execute(query, params)
+            affected_rows = cursor.rowcount
+
+        # SELECT 처리
+        if query.strip().lower().startswith("select"):
+            return cursor.fetchall()
+        else:
+            conn.commit()
+            return affected_rows
+    finally:
+        cursor.close()
+        conn.close()

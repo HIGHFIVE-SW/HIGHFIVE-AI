@@ -5,6 +5,7 @@ flask
 flask-cors
 requests
 python-dotenv
+flasgger
 
 # Bert 임베딩 기반 유사도 추정
 torch
@@ -13,10 +14,8 @@ scikit-learn
 
 # Generative AI
 openai
+google-genai>=0.1.0
 
-# OCR
-paddlepaddle
-paddleocr
 
 # MySQL
 mysql-connector-python
