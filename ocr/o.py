@@ -4,7 +4,6 @@ import requests
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from paddleocr import PaddleOCR
 from openai import OpenAI
 
 # .env파일 로드

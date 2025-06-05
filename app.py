@@ -34,6 +34,9 @@ app.register_blueprint(chat_bp)
 from ocr import ocr_bp
 app.register_blueprint(ocr_bp)
 
+from crawler import crawler_bp
+app.register_blueprint(crawler_bp)
+
 if __name__ == "__main__":
     logger.info("Flask server has started!")
     start_scheduler() # 스케줄러 실행

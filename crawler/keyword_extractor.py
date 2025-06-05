@@ -9,7 +9,8 @@ load_dotenv()
 # 키워드 후보
 KEYWORDS = ['Economy','Environment','PeopleAndSociety','Technology']
 MODEL = 'gemini-2.0-flash-lite'
-DELAY = 3
+DELAY = 2.5
+DEFAULT_KEYWORD = KEYWORDS[0]
 
 def extract_keyword(text: str) -> str:
     """
@@ -71,13 +72,13 @@ Keyword List:
             if keyword in KEYWORDS:
                 return keyword
             else:
-                return KEYWORDS[0]  # 기본값으로 첫 번째 키워드 반환
+                return DEFAULT_KEYWORD  # 기본값으로 첫 번째 키워드 반환
                 
     except Exception as e:
         print(f"API 호출 중 오류 발생: {e}")
-        return KEYWORDS[0]  # 오류 발생 시 기본값으로 첫 번째 키워드 반환
+        return DEFAULT_KEYWORD  # 오류 발생 시 기본값으로 첫 번째 키워드 반환
 
-    return KEYWORDS[0]  # 기본값으로 첫 번째 키워드 반환
+    return DEFAULT_KEYWORD  # 기본값으로 첫 번째 키워드 반환
 
 if __name__ == "__main__":
     # 테스트용 예시
