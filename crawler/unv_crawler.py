@@ -1,6 +1,6 @@
 import requests
-from datetime import datetime, timezone
-from crawler.keyword_extractor import extract_keyword
+from datetime import datetime
+from crawler.activity_processor import extract_keyword
 from crawler.save_to_db import save_activities
 from server.db import run_query
 

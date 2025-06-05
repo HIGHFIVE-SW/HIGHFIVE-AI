@@ -4,9 +4,10 @@ from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flasgger import Swagger
-
 from server.logger import logger
-#test
+from crawler.scheduler import start_scheduler, shutdown_scheduler
+
+# test
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
@@ -35,4 +36,9 @@ app.register_blueprint(ocr_bp)
 
 if __name__ == "__main__":
     logger.info("Flask server has started!")
-    app.run(host="0.0.0.0", port=5000)
+    start_scheduler() # 스케줄러 실행
+    try:
+        app.run(host="0.0.0.0", port=5000, use_reloader=False)  # use_reloader=False로 스케줄러 중복 실행 방지
+    except (KeyboardInterrupt, SystemExit): # 에러 발생시 스케줄러 종료
+        shutdown_scheduler() 
+        logger.info("Scheduler shut down due to server stop.")
