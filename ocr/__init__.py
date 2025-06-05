@@ -1,8 +1,10 @@
+
 from flask import Blueprint, jsonify, request
 from flasgger import Swagger, swag_from
 
 from server.logger import logger
 from .o import is_review_valid
+
 
 ocr_bp = Blueprint('ocr', __name__, url_prefix='/ocr')
 
@@ -77,6 +79,7 @@ def evaluate_image():
        award_ocr_result=is_review_valid(title,awardImageUrlList)
     else:
        award_ocr_result = "False"
+
 
     try:
         return jsonify({"ocrResult": ocr_result,

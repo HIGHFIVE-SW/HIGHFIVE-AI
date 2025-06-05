@@ -16,10 +16,23 @@ scikit-learn
 openai
 google-genai>=0.1.0
 
+
 # MySQL
 mysql-connector-python
 
 # 새로운 패키지
 # package-name
 
-
+pydantic
+langchain
+langchain-openai
+langgraph
+langchain-teddynote
+langgraph-checkpoint-sqlite
+nest_asyncio
+langchain-community
+pymysql
+sqlalchemy
+faiss-cpu
+pip-tools
+streamlit
