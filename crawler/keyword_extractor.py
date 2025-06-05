@@ -1,5 +1,6 @@
 import requests
 import os
+import time
 from dotenv import load_dotenv
 
 # .env 파일에서 환경변수 로드
@@ -8,6 +9,7 @@ load_dotenv()
 # 키워드 후보
 KEYWORDS = ['Economy','Environment','PeopleAndSociety','Technology']
 MODEL = 'gemini-2.0-flash-lite'
+DELAY = 3
 
 def extract_keyword(text: str) -> str:
     """
@@ -53,6 +55,8 @@ Keyword List:
     # API 호출
     headers = {'Content-Type': 'application/json'}
     try:
+        time.sleep(DELAY)
+        
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()  # HTTP 에러 체크
         

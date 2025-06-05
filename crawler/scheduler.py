@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from crawler.main_crawler import run_all_crawlers
 
 # 스케줄러가 동작할 시각 (시, 분)을 설정
-START_TIME_HOUR = 2
+START_TIME_HOUR = 1
 START_TIME_MINUTE = 0
 
 scheduler = BackgroundScheduler()
