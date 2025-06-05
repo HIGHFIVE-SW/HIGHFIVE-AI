@@ -1,7 +1,7 @@
 import requests
 import json
 from datetime import datetime, timedelta, timezone
-from crawler.keyword_extractor import extract_keyword
+from crawler.activity_processor import extract_keyword
 from crawler.save_to_db import save_activities
 from server.db import run_query
 

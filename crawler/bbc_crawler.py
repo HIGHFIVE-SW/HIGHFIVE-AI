@@ -44,7 +44,7 @@ def get_content(url):
     soup = BeautifulSoup(response.content, "html.parser")
     content_divs = soup.find_all('div', attrs={'data-component': 'text-block'})
     contents = [div.get_text(strip=True) for div in content_divs]
-    full_content = '\n'.join(contents) if contents else "No Content"
+    full_content = '\n'.join(contents) if contents else None
 
     return full_content
 
@@ -63,19 +63,25 @@ def get_articles(page, collection_id, end_time):
     articles = []
 
     for data in datas:
-        date = get_datetime(data['firstPublishedAt'])
+        # article 타입이 아니면 무시
+        if data.get('type') != 'article':
+            continue
 
-        if end_time:
-            if is_end(date, end_time):
-                break
+        date = get_datetime(data['firstPublishedAt'])   
 
-        title, summary, keyword = translate_and_categorize(data['title'], data['summary'])
+        # DB의 마지막 날짜를 만나면 중지
+        if end_time and is_end(date, end_time):
+            break
+        
         url = "https://www.bbc.com" + data['path']
+        content = get_content(url)
+        title, content, keyword = translate_and_categorize(data['title'], content) 
+        print(content)
         image = data['indexImage']['model']['blocks']['src'] or None
 
         articles.append(
             {
-                'content': summary,
+                'content': content,
                 'image_url': image,
                 'issue_date': date,
                 'keyword': keyword,
@@ -111,6 +117,11 @@ def crawl():
             page += 1
 
     if results:
+        # 중복된 site_url 제거
+        unique_results = {}
+        for article in results:
+            unique_results[article['site_url']] = article
+        results = list(unique_results.values())
         print(f"[BBC] 크롤링 완료 : {len(results)}개의 이슈를 크롤링했습니다.")
         save_issues(results)
     else:
