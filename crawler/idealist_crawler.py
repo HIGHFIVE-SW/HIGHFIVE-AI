@@ -1,7 +1,7 @@
 import requests
 import json
 from datetime import datetime, timedelta, timezone
-from crawler.activity_processor import extract_keyword
+from crawler.llm_processor import extract_activity_keyword
 from crawler.save_to_db import save_activities
 from server.db import run_query
 
@@ -97,7 +97,7 @@ def get_activities(page, timestamp, type):
             activity_url = get_url(item)
             start_date = get_published(item)
             end_date = None
-            keyword = extract_keyword(activity_content)
+            keyword = extract_activity_keyword(activity_content)
 
             result.append(
                 {

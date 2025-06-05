@@ -1,5 +1,5 @@
 import requests
-from crawler.issue_processor import translate_and_categorize
+from crawler.llm_processor import summarize_and_categorize_issue
 from crawler.save_to_db import save_issues
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -75,7 +75,7 @@ def get_articles(page, collection_id, end_time):
         
         url = "https://www.bbc.com" + data['path']
         content = get_content(url)
-        title, content, keyword = translate_and_categorize(data['title'], content) 
+        title, content, keyword = summarize_and_categorize_issue(data['title'], content) 
         print(content)
         image = data['indexImage']['model']['blocks']['src'] or None
 
