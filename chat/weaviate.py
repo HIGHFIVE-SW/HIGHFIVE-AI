@@ -1,10 +1,19 @@
 """Weaviate 벡터스토어 연결 및 컨텍스트 관리 유틸리티 모듈."""
 import weaviate
 from weaviate import WeaviateClient
+from weaviate.classes.init import Auth
+from dotenv import load_dotenv
+import os
 
 from .constants import weaviate_headers
+from server.logger import logger
 from weaviate.collections.classes.filters import Filter
 from weaviate.collections.classes.grpc import Sort
+
+load_dotenv()
+
+weaviate_url = os.getenv("WEAVIATE_URL")
+weaviate_api_key = os.getenv("WEAVIATE_API_KEY")
 
 
 def connect_weaviate() -> WeaviateClient:
@@ -13,9 +22,19 @@ def connect_weaviate() -> WeaviateClient:
     Returns:
         WeaviateClient: 연결된 Weaviate 클라이언트
     """
-    return weaviate.connect_to_local(
+
+    client = weaviate.connect_to_weaviate_cloud(
+        cluster_url=weaviate_url,
+        auth_credentials=Auth.api_key(weaviate_api_key),
         headers=weaviate_headers,
     )
+
+    if client.is_ready():
+        logger.info(f"Weaviate Client is in ready.")
+    else:
+        logger.critical(f"Weaviate Client is not in ready!")
+
+    return client
 
 
 class WeaviateClientContext:

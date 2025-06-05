@@ -165,7 +165,7 @@ class VectorStoreMethods:
 
             ##### 3. 차집합: MySQL에는 있고 Weaviate에는 없는 id #####
             missing_activity_ids:list[bytes] = [UUID(aid).bytes for aid in (mysql_ids - weaviate_ids)]
-            logger.info(f"MySQL에는 있고 Weaviate에는 업데이트되지 않은 activity id 리스트 확보: {len(mysql_ids)}개")
+            logger.info(f"MySQL에는 있고 Weaviate에는 업데이트되지 않은 activity id 리스트 확보: {len(missing_activity_ids)}개")
 
 
             ##### 4. MySQL에서 레코드 로드 후 Weaviate에 추가 #####
@@ -175,9 +175,9 @@ class VectorStoreMethods:
                         # 단계 4: DB 생성(Create DB) 및 저장
                         # 벡터스토어를 생성하고, 저장한다.
                         docs = [doc for doc in docs if doc]
-                        print(docs)
                         logger.debug(f"Adding documents to the vectorstore.")
-                        cls.vectorstore.add_documents(docs)
+                        for doc in docs:
+                            cls.vectorstore.add_documents([doc])
 
             if weaviate_client.batch.failed_objects:
                 for failed in weaviate_client.batch.failed_objects:

@@ -38,7 +38,8 @@ class LangGraphMethods:
         workflow.add_node("ask_question", self.ask_question)
         workflow.add_node("search_web", self.search_web)
         workflow.add_node("tavily", self.tavily_search_tool_node)
-        workflow.add_node("execute_search", lambda state: self.execute_search(state, self.build_retriever_tool()))
+        retrieve_by_keyword, retrieve_by_history = self.build_retriever_tool()
+        workflow.add_node("execute_search", lambda state: self.execute_search(state, retrieve_by_keyword, retrieve_by_history))
         workflow.add_node("generate", self.generate)
 
         workflow.set_entry_point("ask_question")
@@ -63,15 +64,15 @@ class LangGraphMethods:
 
         return compiled_workflow
 
-    def ask(self: 'Bot', question: str) -> str:
-        self.update_vectorstore()
+    def ask(self: 'Bot', question: str, question_type:Literal["web", "keyword", "history", "others"]) -> str:
         inputs = {
             "messages": [
                 ("user", question)
             ]
         }
         # config 설정(재귀 최대 횟수, thread_id)
-        config = RunnableConfig(recursion_limit=10, configurable={"thread_id": self.id})
+        config = RunnableConfig(recursion_limit=10, configurable={"thread_id": self.id,
+                                                                  "question_type": question_type})
 
         # RecursionError에 대비해서 미리 상태 백업
         saved_state = self.graph.get_state(config)

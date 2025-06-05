@@ -7,8 +7,20 @@ from .bot import Bot
 
 chat_bp = Blueprint('chat', __name__, url_prefix='/chatbot')
 
-@chat_bp.route('/<uuid:user_id>', methods=['GET'])
-def chat_with_watson(user_id:UUID):
+@chat_bp.route('/<uuid:user_id>/web', methods=['GET'])
+def ask_web_to_watson(user_id:UUID):
+    return chat_with_watson(user_id, "web")
+@chat_bp.route('/<uuid:user_id>/keyword-recommendation', methods=['GET'])
+def ask_keyword_to_watson(user_id:UUID):
+    return chat_with_watson(user_id, "keyword")
+@chat_bp.route('/<uuid:user_id>/history-recommendation', methods=['GET'])
+def ask_history_to_watson(user_id:UUID):
+    return chat_with_watson(user_id, "history")
+@chat_bp.route('/<uuid:user_id>/others', methods=['GET'])
+def ask_others_to_watson(user_id:UUID):
+    return chat_with_watson(user_id, "others")
+
+def chat_with_watson(user_id:UUID, question_type:Literal["web", "keyword", "history", "others"]):
     user_id:bytes = user_id.bytes
     data = request.args
     if response_for_invalid_request := confirm_request(data, {
@@ -18,7 +30,7 @@ def chat_with_watson(user_id:UUID):
         return response_for_invalid_request
 
     if data['request'] == "ask":
-        return jsonify({"answer": Bot(user_id).ask(data['question'])}), 200
+        return jsonify({"answer": Bot(user_id).ask(data['question'], question_type)}), 200
         # try:
         #     return jsonify({"answer": Bot(user_id).ask(data['question'])}), 200
         # except Exception as e:
