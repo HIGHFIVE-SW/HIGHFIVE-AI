@@ -1,11 +1,9 @@
-import torch
 import os
+
 import requests
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
-from paddleocr import PaddleOCR
-from openai import OpenAI
 
 # .env파일 로드
 load_dotenv()
