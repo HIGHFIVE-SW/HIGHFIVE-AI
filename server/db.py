@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
 # 환경변수로부터 DB 연결 정보 가져오기
 DB_HOST = os.getenv("MYSQL_DB_HOST")
 DB_NAME = os.getenv("MYSQL_DB_NAME")
