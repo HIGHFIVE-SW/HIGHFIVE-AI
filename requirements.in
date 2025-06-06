@@ -11,6 +11,7 @@ flask-cors
 requests
 python-dotenv
 flasgger
+APScheduler
 
 # Bert 임베딩 기반 유사도 추정
 torch
