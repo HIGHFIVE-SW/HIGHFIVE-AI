@@ -9,7 +9,7 @@ load_dotenv()
 # 키워드 후보
 KEYWORDS = ['Economy','Environment','PeopleAndSociety','Technology']
 MODEL = 'gemini-2.0-flash-lite'
-DELAY = 3
+DELAY = 2.5 # 무료티어 RPM 제한 (분당 30회) 방지
 
 def extract_keyword(text: str) -> str:
     """
@@ -55,8 +55,7 @@ Keyword List:
     # API 호출
     headers = {'Content-Type': 'application/json'}
     try:
-        time.sleep(DELAY)
-        
+        time.sleep(DELAY) # 무료티어 제한 (분당 30회) 회피를 위해 일정시간 대기
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()  # HTTP 에러 체크
         

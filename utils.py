@@ -1,5 +1,25 @@
 from flask import jsonify
 from typing import get_origin, get_args, Any, Union, Literal
+from datetime import datetime, timezone
+
+def dict_to_xml(data: dict) -> str:
+    """딕셔너리를 XML 문자열로 변환합니다.
+
+    Args:
+        data: 변환할 딕셔너리
+
+    Returns:
+        str: XML 형식의 문자열
+    """
+    xml_parts = []
+    for key, value in data.items():
+        if isinstance(value, datetime):
+            # Ensure UTC and ISO format
+            text = value.astimezone(timezone.utc).isoformat()
+        else:
+            text = str(value)
+        xml_parts.append(f'<{key}>{text}</{key}>')
+    return ''.join(xml_parts)
 
 def is_valid_type(value, expected_type):
     origin = get_origin(expected_type)

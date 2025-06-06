@@ -1,16 +1,23 @@
 # coding: utf-8
 
+# 공통
+nest_asyncio
+pip-tools
+streamlit
+
 # flask 서버
 flask
 flask-cors
 requests
 python-dotenv
 flasgger
+APScheduler
 
 # Bert 임베딩 기반 유사도 추정
 torch
 transformers
 scikit-learn
+sentence-transformers
 
 # Generative AI
 openai
@@ -20,19 +27,18 @@ google-genai>=0.1.0
 # MySQL
 mysql-connector-python
 
-# 새로운 패키지
-# package-name
-
+# 챗봇
 pydantic
 langchain
 langchain-openai
 langgraph
 langchain-teddynote
 langgraph-checkpoint-sqlite
-nest_asyncio
 langchain-community
+langchain-weaviate
 pymysql
 sqlalchemy
-faiss-cpu
-pip-tools
-streamlit
+weaviate-client
+
+# 새로운 패키지
+# package-name
