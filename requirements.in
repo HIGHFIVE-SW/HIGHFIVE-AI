@@ -19,6 +19,9 @@ transformers
 scikit-learn
 sentence-transformers
 
+# 크롤링
+beautifulsoup4
+
 # Generative AI
 openai
 google-genai>=0.1.0
