@@ -9,15 +9,131 @@ chat_bp = Blueprint('chat', __name__, url_prefix='/chatbot')
 
 @chat_bp.route('/<uuid:user_id>/web', methods=['GET'])
 def ask_web_to_watson(user_id:UUID):
+    """
+        웹 검색 기반 질문 응답 API
+        ---
+        parameters:
+          - name: user_id
+            in: path
+            type: string
+            required: true
+            description: 사용자 UUID
+          - name: question
+            in: query
+            type: string
+            required: true
+            description: 사용자의 질문
+          - name: request
+            in: query
+            type: string
+            enum: ["ask", "reset"]
+            required: true
+            description: "요청 유형 (ask: 질문, reset: 대화 초기화)"
+        responses:
+          200:
+            description: 성공 응답
+            schema:
+              type: object
+              properties:
+                answer:
+                  type: string
+        """
     return chat_with_watson(user_id, "web")
 @chat_bp.route('/<uuid:user_id>/keyword-recommendation', methods=['GET'])
 def ask_keyword_to_watson(user_id:UUID):
+    """
+        키워드 추천 질문 응답 API
+        ---
+        parameters:
+          - name: user_id
+            in: path
+            type: string
+            required: true
+            description: 사용자 UUID
+          - name: question
+            in: query
+            type: string
+            required: true
+            description: 키워드 추천 관련 질문
+          - name: request
+            in: query
+            type: string
+            enum: ["ask", "reset"]
+            required: true
+            description: "요청 유형 (ask: 질문, reset: 대화 초기화)"
+        responses:
+          200:
+            description: 성공 응답
+            schema:
+              type: object
+              properties:
+                answer:
+                  type: string
+        """
     return chat_with_watson(user_id, "keyword")
 @chat_bp.route('/<uuid:user_id>/history-recommendation', methods=['GET'])
 def ask_history_to_watson(user_id:UUID):
+    """
+        활동 이력 기반 추천 질문 응답 API
+        ---
+        parameters:
+          - name: user_id
+            in: path
+            type: string
+            required: true
+            description: 사용자 UUID
+          - name: question
+            in: query
+            type: string
+            required: true
+            description: 이력 기반 추천 관련 질문
+          - name: request
+            in: query
+            type: string
+            enum: ["ask", "reset"]
+            required: true
+            description: "요청 유형 (ask: 질문, reset: 대화 초기화)"
+        responses:
+          200:
+            description: 성공 응답
+            schema:
+              type: object
+              properties:
+                answer:
+                  type: string
+        """
     return chat_with_watson(user_id, "history")
 @chat_bp.route('/<uuid:user_id>/others', methods=['GET'])
 def ask_others_to_watson(user_id:UUID):
+    """
+        기타 질문 응답 API
+        ---
+        parameters:
+          - name: user_id
+            in: path
+            type: string
+            required: true
+            description: 사용자 UUID
+          - name: question
+            in: query
+            type: string
+            required: true
+            description: 기타 질문
+          - name: request
+            in: query
+            type: string
+            enum: ["ask", "reset"]
+            required: true
+            description: "요청 유형 (ask: 질문, reset: 대화 초기화)"
+        responses:
+          200:
+            description: 성공 응답
+            schema:
+              type: object
+              properties:
+                answer:
+                  type: string
+        """
     return chat_with_watson(user_id, "others")
 
 def chat_with_watson(user_id:UUID, question_type:Literal["web", "keyword", "history", "others"]):

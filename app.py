@@ -26,14 +26,14 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-swagger=Swagger(app)
-
 # 모든 Blueprint 등록
 from chat import chat_bp
 app.register_blueprint(chat_bp)
 
-# from ocr import ocr_bp
-# app.register_blueprint(ocr_bp)
+from ocr import ocr_bp
+app.register_blueprint(ocr_bp)
+
+swagger=Swagger(app)
 
 # logger.debug('DEBUG logging test.')
 # logger.info('INFO logging test.')
