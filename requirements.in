@@ -39,6 +39,7 @@ langchain-weaviate
 pymysql
 sqlalchemy
 weaviate-client
+IPython
 
 # 새로운 패키지
 # package-name
