@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from crawler.keyword_extractor import extract_keyword
 from crawler.save_to_db import save_activities
 from server.db import run_query
+from server.logger import logger
 
 ENDPOINT = "https://nsv3auess7-dsn.algolia.net/1/indexes/*/queries"
 HEADERS = {
@@ -83,7 +84,7 @@ def get_activities(page, timestamp, type):
     try:
         data = response.json()["results"][0]["hits"]
     except Exception as e:
-        print(f"[!] JSON 파싱 에러: {e}")
+        logger.error(f"[!] JSON 파싱 에러: {e}")
         return None
 
     result = []
@@ -112,20 +113,20 @@ def get_activities(page, timestamp, type):
                     "start_date": start_date
                 }
             )
-            print(f"[IDEALIST] 크롤링 완료 : {item.get("name", '')}")
+            logger.info(f"[IDEALIST] 크롤링 완료 : {item.get('name', '')}")
         return result
     else:
         return None
 
 def crawl():
-    print("[IDEALIST] 크롤링 시작")
+    logger.info("[IDEALIST] 크롤링 시작")
     crawled_activities = []
     last_timestamp = get_last_timestamp()
 
     if last_timestamp > 0:
-        print(f"[IDEALIST] DB의 마지막 활동 이후 데이터만 크롤링 시작 (TIMESTAMP: {last_timestamp})")
+        logger.info(f"[IDEALIST] DB의 마지막 활동 이후 데이터만 크롤링 시작 (TIMESTAMP: {last_timestamp})")
     else:
-        print(f"[IDEALIST] DB에 활동 없음, 모든 데이터 크롤링 시작")
+        logger.info(f"[IDEALIST] DB에 활동 없음, 모든 데이터 크롤링 시작")
 
     for type in ['volunteer', 'internship']:
         page = 0
@@ -137,10 +138,10 @@ def crawl():
             page += 1
 
     if crawled_activities:
-        print(f"[IDEALIST] 크롤링 완료 : {len(crawled_activities)}개의 활동을 크롤링했습니다.")
+        logger.info(f"[IDEALIST] 크롤링 완료 : {len(crawled_activities)}개의 활동을 크롤링했습니다.")
         save_activities(crawled_activities)
     else:
-        print("[IDEALIST] 크롤링 완료 : 새로운 활동이 없습니다.") 
+        logger.info("[IDEALIST] 크롤링 완료 : 새로운 활동이 없습니다.")
 
 if __name__ == "__main__":
     crawl()
