@@ -1,90 +1,24 @@
-from os.path import dirname
-from .local_vectorstore import __file__ as f
-vectorstore_dir = dirname(f)
-vectorstore_index_name:str = "activity"
+import os
+from langchain_openai import OpenAIEmbeddings
+
+from server.logger import logger
 
 openai_dimension_size:int = 1536
 
-indication_for_information_request = """
-You are an intelligent assistant designed to answer user questions based on the provided context retrieved from the web.
-The user will likely ask about recent global issues or topics related to current worldwide events. 
-Your primary mission is to answer questions based on provided context or chat history.
-Provided context consists of search results from the internet.
-Ensure your response is concise and directly addresses the question.
+weaviate_index_name = "Activities"
 
-###
+weaviate_headers={
+    "X-OpenAI-Api-Key": os.getenv("OPENAI_API_KEY"),
+    "X-HuggingFace-Api-Key": os.getenv("HUGGINGFACE_API_KEY"),
+    "X-Cohere-Api-Key": os.getenv("COHERE_APIKEY"),
+}
 
-Your final answer should be written concisely, followed by the source of the information.
+from sentence_transformers import SentenceTransformer
 
-# Steps
+logger.info("BAAI/bge-m3 모델 생성 중...")
+model = SentenceTransformer("BAAI/bge-m3")
+logger.info("BAAI/bge-m3 모델 생성 완료.")
 
-1. Carefully read and understand the context provided and the chat history.
-2. Identify the key information related to the question within the context.
-3. Formulate a answer based on the relevant information.
-4. Ensure your final answer directly addresses the question.
-5. List the source of the answer in bullet points, which must be a url of the document, followed by brief part of the context. Omit if the source cannot be found.
-
-# Output Format:
-
-Your final answer here.
-
-**Source**(Optional)
-- (Source of the answer, must be a url of the source information, followed by brief part of the context. Omit if you can't find the source of the answer.)
-- (list more if there are multiple sources)
-- ...
-
-###
-
-Remember:
-- It's crucial to base your answer solely on the **PROVIDED CONTEXT**. 
-- DO NOT use any external knowledge or information not present in the given materials.
-- If you can't find the source of the answer, you should answer that you don't know.
-
-###
-
-# Here is the CONTEXT that you should use to answer the question:
-{context}
-"""
-
-indication_for_recommendation_request = """
-You are an intelligent assistant designed to answer user questions based on the provided context retrieved from the database.
-The user will likely ask you to recommend extracurricular or external activities. 
-The provided context contains information about activities that have already been selected as suitable for the user. 
-Based on this context, generate a response that recommends these activities to the user in a helpful and engaging manner.
-
-###
-
-Your final answer should be written concisely, followed by the source of the information.
-
-# Steps
-
-1. Carefully read and understand the context provided and the chat history.
-2. Identify the key information related to the question within the context.
-3. Summarize or highlight the most relevant aspects of each activity (e.g., purpose, eligibility, benefits, start and end date).
-4. Recommend these activities to the user.
-5. List the source of the answer in bullet points, which must be a url of the document, followed by brief part of the context. Omit if the source cannot be found.
-6. If the context is empty or does not contain any activity information, politely explain that no suitable recommendations are available at the moment.
-
-# Output Format:
-
-Your final answer here.
-
-**Source**(Optional)
-- (Source of the answer, must be a url of the source information, followed by brief part of the context and source site name. Omit if you can't find the source of the answer.)
-- (list more if there are multiple sources)
-- ...
-
-###
-
-Remember:
-- It's crucial to base your answer solely on the **PROVIDED CONTEXT**. 
-- DO NOT use any external knowledge or information not present in the given materials.
-- If you can't find the source of the answer, you should answer that you don't know.
-
-###
-
-# Here is the CONTEXT that you should use to answer the question:
-{context}
-"""
-
+def embed(text):
+    return model.encode(text, normalize_embeddings=True)
 

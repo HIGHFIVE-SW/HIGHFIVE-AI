@@ -1,3 +1,4 @@
+from server.logger import logger
 import os
 import sys
 from flask import Flask
@@ -31,8 +32,14 @@ swagger=Swagger(app)
 from chat import chat_bp
 app.register_blueprint(chat_bp)
 
-from ocr import ocr_bp
-app.register_blueprint(ocr_bp)
+# from ocr import ocr_bp
+# app.register_blueprint(ocr_bp)
+
+# logger.debug('DEBUG logging test.')
+# logger.info('INFO logging test.')
+# logger.warning('WARNING logging test.')
+# logger.error('ERROR logging test.')
+# logger.critical('CRITICAL logging test.')
 
 if __name__ == "__main__":
     logger.info("Flask server has started!")
