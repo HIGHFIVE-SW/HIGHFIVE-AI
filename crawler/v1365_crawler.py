@@ -33,7 +33,7 @@ def get_exist_ids():
         ORDER BY id DESC
     """
     result = run_query(sql)
-    return [int(row[0]) for row in result] if result else []
+    return [int(row['id']) for row in result] if result else []
 
 def get_last_page():
     """1365사이트의 마지막 페이지 번호를 반환"""

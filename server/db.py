@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, List, Tuple
 from mysql.connector import connect, Error, MySQLConnection
 from mysql.connector.cursor import MySQLCursorDict
 from dotenv import load_dotenv
@@ -11,7 +11,7 @@ DB_NAME = os.getenv("MYSQL_DB_NAME")
 DB_USER = os.getenv("MYSQL_DB_USER")
 DB_PASSWORD = os.getenv("MYSQL_DB_PASSWORD")
 
-def run_query(query: str, params: Optional[tuple] = None):
+def run_query(query: str, params: Optional[Union[Tuple, List[Tuple]]] = None):
     """
     매번 새로운 MySQL 커넥션을 생성하여 쿼리를 실행하고,
     실행 완료 후 항상 연결을 닫는다.
@@ -31,10 +31,23 @@ def run_query(query: str, params: Optional[tuple] = None):
         # 2) cursor 생성 (dictionary=True: 결과를 dict 형태로 반환)
         cursor = conn.cursor(dictionary=True)
 
+        # 3) 쿼리 타입 확인
+        query_type = query.strip().split()[0].lower()
+
         # 3) 쿼리 실행
-        cursor.execute(query, params)
-        results = cursor.fetchall()
-        return results
+        if query_type == "select": 
+            # SELECT 쿼리일 경우
+            cursor.execute(query, params)
+            return cursor.fetchall()
+        elif isinstance(params, list) and all(isinstance(p, tuple) for p in params):
+            # 다중 행 처리일 경우
+            cursor.executemany(query, params)
+        else:
+            # 단일 행 실행일 경우
+            cursor.execute(query, params)
+
+        conn.commit()
+        return cursor.rowcount # 영향받은 행 수 반환
 
     except Error as e:
         # 에러가 발생하면 적절히 로깅하거나 예외를 재전달할 수 있음

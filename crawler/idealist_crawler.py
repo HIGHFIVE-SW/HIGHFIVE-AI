@@ -25,7 +25,7 @@ def get_last_timestamp():
     last_timestamp = run_query(sql)
 
     if last_timestamp:
-        dt = last_timestamp[0][0].replace(tzinfo=timezone.utc)
+        dt = last_timestamp[0]['start_date'].replace(tzinfo=timezone.utc)
         return int(dt.timestamp())
     else:
         return 0
