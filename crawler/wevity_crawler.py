@@ -40,8 +40,8 @@ def get_latest_activity_id():
     """
     result = run_query(sql)
     
-    if result and result[0][0]:
-        return int(result[0][0])
+    if result and result[0]['activity_id']:
+        return int(result[0]['activity_id'])
     else:
         return 0
 

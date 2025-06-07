@@ -18,13 +18,13 @@ SIZE = 9
 
 def get_last_issue_date():
     sql = """
-        SELECT MAX(issue_date)
+        SELECT MAX(issue_date) AS max_date
         FROM issues;
     """
     result = run_query(sql)
 
-    if result and result[0][0]:
-        dt = result[0][0]
+    if result and result[0]['max_date']:
+        dt = result[0]['max_date']
         latest_issue_date = dt.strftime("%Y-%m-%d %H:%M:%S.%f")
         return latest_issue_date
     else:

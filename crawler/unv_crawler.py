@@ -22,7 +22,7 @@ def get_latest_activity_id():
     """
     result = run_query(query)
             
-    return int(result[0][0]) if result else 0
+    return int(result[0]['activity_id']) if result else 0
 
 def get_total_count():
     payload = {
