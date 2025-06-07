@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from server.db import run_query
 from crawler.save_to_db import save_activities
-from crawler.activity_processor import extract_keyword
+from crawler.llm_processor import extract_activity_keyword
 from itertools import chain
 
 LIST_ENDPOINT = "https://www.1365.go.kr/vols/1572247904127/partcptn/timeCptn.do"
@@ -103,7 +103,7 @@ async def fetch_detail(id):
 
     start_date, end_date = extract_dates(soup)
     activity_content = extract_content(soup)
-    keyword = extract_keyword(activity_content)
+    keyword = extract_activity_keyword(activity_content)
     activity_name = extract_name(soup)
 
     return {
