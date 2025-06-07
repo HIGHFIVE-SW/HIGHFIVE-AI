@@ -36,7 +36,6 @@ def run_crawlers(targets=None):
 
     print("===== 크롤링 종료 =====")
 
-
 if __name__ == '__main__':
     selected = sys.argv[1:]  # 인자 없으면 전체 실행
     run_crawlers(selected if selected else None)

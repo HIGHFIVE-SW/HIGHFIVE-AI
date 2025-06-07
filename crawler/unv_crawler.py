@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime
-from crawler.activity_processor import extract_keyword
+from crawler.llm_processor import extract_activity_keyword
 from crawler.save_to_db import save_activities
 from server.db import run_query
 
@@ -78,7 +78,7 @@ def fetch_activity_detail(activity_id_list):
         start_date = iso_to_utc(data.get("publishDate"))
         end_date = data.get("sourcingEndDate")
         site_url = URL_BASE + str(activity_id)
-        keyword = extract_keyword(data.get('organizationMission') or activity_name)
+        keyword = extract_activity_keyword(data.get('organizationMission') or activity_name)
 
         activities.append(
             {

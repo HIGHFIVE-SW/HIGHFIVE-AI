@@ -5,7 +5,7 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from server.db import run_query
 from crawler.save_to_db import save_activities
-from crawler.activity_processor import extract_keyword
+from crawler.llm_processor import extract_activity_keyword
 
 BASE_URL = "https://www.wevity.com"
 FILE_NAME = "data/wevity_data.json"
@@ -123,7 +123,7 @@ def get_activity_detail(url):
         activity_name = soup.select_one("h6.tit").get_text(strip=True) or None
         start_date, end_date = get_date_range(soup)
         activity_image_url = get_image_url(soup)
-        keyword = extract_keyword(activity_content)
+        keyword = extract_activity_keyword(activity_content)
 
         return {
             "activity_site": "WEVITY",
