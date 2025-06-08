@@ -112,7 +112,7 @@ def get_activities(page, timestamp, type):
                     "start_date": start_date
                 }
             )
-            print(f"[IDEALIST] 크롤링 완료 : {item.get("name", '')}")
+            print(f"[IDEALIST] 크롤링 완료 : {item.get('name', '')}")
         return result
     else:
         return None
