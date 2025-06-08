@@ -64,10 +64,10 @@ def is_review_valid(title: str, image_urls: list[str]) -> bool:
             contents=contents,
             config={
                 # 응답형식을 True, False로 제한
-                'response_mime_type': 'text/x.enum',
-                'response_schema': {
-                    "type": "STRING",
-                    "enum": ["True", "False"]
+                #'response_mime_type': 'text/x.enum',
+                #'response_schema': {
+                #    "type": "STRING",
+                #    "enum": ["True", "False"]
                 }
             }
         )
