@@ -68,7 +68,7 @@ def is_review_valid(title: str, image_urls: list[str]) -> bool:
                 #'response_schema': {
                 #    "type": "STRING",
                 #    "enum": ["True", "False"]
-                }
+                
             }
         )
 
