@@ -15,7 +15,7 @@ HEADERS = {
 }
 DEFAULT_IMAGE_URL = "https://play-lh.googleusercontent.com/9Kheg_iekobkZlP9XzKtwv_j_YL88oVzHCtHe4_hIL3JcQabCL3FFEw4vKzL1XQc8GE"
 BATCH_SIZE = 5 # 한번에 BATCH_SIZE개의 HTTP 요청을 보냄
-MAX_CRAWL_PAGE = 10 # 크롤링할 페이지 수
+MAX_CRAWL_PAGE = 50 # 크롤링할 페이지 수
 
 async def get_soup(url, params=None):
     """URL에 GET 요청을 보내고 BeautifulSoup 객체를 반환"""
