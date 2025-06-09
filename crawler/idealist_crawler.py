@@ -13,6 +13,8 @@ HEADERS = {
     "x-algolia-application-id": "NSV3AUESS7"
 }
 DEFAULT_IMAGE_URL = "https://www.idealist.org/assets/417d88fd628db1c1ac861f3ea8db58c1a159d52a/images/icons/action-opps/action-opps-volunteermatch.svg"
+TARGET_TYPES = ['internship']
+# TARGET_TYPES = ['volunteer', 'internship']
 
 def get_last_timestamp():
     sql = """
@@ -127,7 +129,7 @@ def crawl():
     else:
         print(f"[IDEALIST] DB에 활동 없음, 모든 데이터 크롤링 시작")
 
-    for type in ['volunteer', 'internship']:
+    for type in TARGET_TYPES:
         page = 0
         while True:
             activities = get_activities(page, last_timestamp, type)

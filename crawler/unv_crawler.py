@@ -10,7 +10,7 @@ URL_BASE = "https://app.unv.org/opportunities/"
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
 }
-DEFAULT_IMAGE_URL = "https://www.unv.org/sites/default/files/unvol.png"
+DEFAULT_IMAGE_URL = "https://yt3.googleusercontent.com/ytc/AIdro_m9Ch_jB3G0voGzoFTOIWMxkpivX4xN9g3R_lnLHe9w6Uk=s900-c-k-c0x00ffffff-no-rj"
 
 def get_latest_activity_id():
     query = """
