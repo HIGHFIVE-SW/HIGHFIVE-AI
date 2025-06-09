@@ -12,7 +12,8 @@ HEADERS = {
     "x-algolia-api-key": "c2730ea10ab82787f2f3cc961e8c1e06",
     "x-algolia-application-id": "NSV3AUESS7"
 }
-DEFAULT_IMAGE_URL = "https://www.idealist.org/assets/417d88fd628db1c1ac861f3ea8db58c1a159d52a/images/icons/action-opps/action-opps-volunteermatch.svg"
+IMG_URL_BASE = "https://www.idealist.org/images/"
+DEFAULT_IMG_URL = "https://upload.wikimedia.org/wikipedia/en/7/7d/Idealist-logo-09.jpg"
 TARGET_TYPES = ['internship']
 # TARGET_TYPES = ['volunteer', 'internship']
 
@@ -71,8 +72,19 @@ def get_url(item):
     return ""
 
 def get_image(item):
-    img = item.get("imageUrl") or DEFAULT_IMAGE_URL
-    return img
+    image = item.get("image")
+    if isinstance(image, dict) and image.get("handle"):
+        return IMG_URL_BASE + image["handle"]
+
+    if item.get("imageUrl"):
+        return IMG_URL_BASE + item["imageUrl"]
+
+    logo = item.get("logo")
+    if isinstance(logo, dict) and logo.get("handle"):
+        return IMG_URL_BASE + logo["handle"]
+
+    return DEFAULT_IMG_URL
+
 
 def get_published(item):
     timestamp = item.get("published")
