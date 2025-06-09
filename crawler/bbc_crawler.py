@@ -9,7 +9,9 @@ BASE_URL = 'https://web-cdn.api.bbci.co.uk/xd/content-collection/'
 COLLECTIONS = {
     'natural-wonders' : '9f0b9075-b620-4859-abdc-ed042dd9ee66',
     'weather-science' : '696fca43-ec53-418d-a42c-067cb0449ba9',
-    'climate-solutions' : '5fa7bbe8-5ea3-4bc6-ac7e-546d0dc4a16b',
+    'climate-solutions' : '5fa7bbe8-5ea3-4bc6-ac7e-546d0dc4a16b',   
+    'world' : '07cedf01-f642-4b92-821f-d7b324b8ba73',
+    'innovation' : '3da03ce0-ee41-4427-a5d9-1294491e0448'
 }
 HEADERS = {
     'User-Agent': 'Mozilla/5.0'
@@ -76,7 +78,6 @@ def get_articles(page, collection_id, end_time):
         url = "https://www.bbc.com" + data['path']
         content = get_content(url)
         title, content, keyword = summarize_and_categorize_issue(data['title'], content) 
-        print(content)
         image = data['indexImage']['model']['blocks']['src'] or None
 
         articles.append(

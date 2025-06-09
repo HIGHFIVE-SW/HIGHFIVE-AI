@@ -33,6 +33,9 @@ app.register_blueprint(chat_bp)
 from ocr import ocr_bp
 app.register_blueprint(ocr_bp)
 
+from crawler import crawler_bp
+app.register_blueprint(crawler_bp)
+
 swagger=Swagger(app)
 
 # logger.debug('DEBUG logging test.')
