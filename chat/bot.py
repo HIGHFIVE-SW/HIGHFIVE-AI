@@ -13,7 +13,6 @@ from .nodes import LangGraphNodes
 from .tools import Tools
 from .vectorstore import VectorStoreMethods
 
-
 class Bot(LangGraphMethods, VectorStoreMethods, Tools, LangGraphNodes):
     _instances: dict[bytes, 'Bot'] = {}
     _lock: threading.Lock = threading.Lock()
@@ -45,7 +44,6 @@ class Bot(LangGraphMethods, VectorStoreMethods, Tools, LangGraphNodes):
         # 메모리 저장소 생성 (그래프에 사용되기 때문에, 반드시 그래프 생성 이전에 선행되어야 함)
         # 챗봇이 호출될 때마다 Bot 클래스 속성인 vectorstore를 업데이트
         with Bot._lock:
-            Bot.update_vectorstore()
             if hasattr(self, "_initialized"):
                 return
             self._initialized = True

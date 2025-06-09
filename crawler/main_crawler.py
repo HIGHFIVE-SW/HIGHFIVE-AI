@@ -3,6 +3,7 @@ from crawler.wevity_crawler import crawl as wevity_crawler
 from crawler.idealist_crawler import crawl as idealist_crawler
 from crawler.unv_crawler import crawl as unv_crawler
 from crawler.v1365_crawler import crawl as v1365_crawler
+from chat.bot import Bot
 import sys
 
 CRAWLER_MAP = {
@@ -35,6 +36,11 @@ def run_crawlers(targets=None):
             print(f"[{name}] 은(는) 등록되지 않은 크롤러입니다.")
 
     print("===== 크롤링 종료 =====")
+
+    print("===== 벡터DB 변환 시작 =====")
+    # MYSQL에 저장된 데이터를 Weaviate DB로 전송
+    Bot.update_vectorstore()
+    print("===== 벡터DB 변환 종료 =====")
 
 if __name__ == '__main__':
     selected = sys.argv[1:]  # 인자 없으면 전체 실행
