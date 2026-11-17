@@ -26,8 +26,9 @@ jobs:
       - name: Set Issue Data Based on Title
         id: set-data
         shell: bash
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          ISSUE_TITLE="${{ github.event.issue.title }}"
           echo "Detected issue title: $ISSUE_TITLE"
           if echo "$ISSUE_TITLE" | grep -iq '\[Bug\]'; then
             echo "ISSUE_TYPE=버그" >> $GITHUB_ENV
